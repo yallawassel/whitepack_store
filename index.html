@@ -92,6 +92,40 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   color: #475569;
   margin-bottom: 10px;
 }
+
+/* client box */
+.client-box {
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.04);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:10px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.client-box label { font-size:12.5px; }
+.client-box input {
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+  padding:4px 8px;
+  font-size:13px;
+}
+#clientDiscountBadge {
+  background:#d1fae5;
+  color:#065f46;
+  padding:3px 8px;
+  border-radius:9999px;
+  font-size:12px;
+  display:none;
+}
+#clientNotFound {
+  font-size:11.5px;
+  color:#b91c1c;
+  display:none;
+}
+
 .controls {
   display: flex;
   gap: 8px;
@@ -305,6 +339,7 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
   header{flex-wrap:wrap}
   .topbar{align-items:flex-start}
+  .client-box{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -327,8 +362,19 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
 
 <main class="container">
   <div id="lastUpdated">Last updated: --</div>
+
+  <!-- CLIENT SECTION -->
+  <div class="client-box">
+    <div style="flex:1">
+      <label id="clientNameLabel" for="clientName">Client name</label>
+      <input id="clientName" placeholder="Type your name..." />
+    </div>
+    <div id="clientDiscountBadge">Discount: 0%</div>
+    <div id="clientNotFound">No discount for this client</div>
+  </div>
+
   <div id="adminControls">
-    <button class="add-btn" onclick="alert('Use admin.html to upload Excel and export products.json, then upload to GitHub.')">Admin info</button>
+    <button class="add-btn" onclick="alert('Use admin.html to upload Excel and export products.json and clients.json, then upload both to GitHub.')">Admin info</button>
   </div>
   <div class="controls">
     <input id="search" placeholder="Search products..." />
@@ -351,9 +397,12 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
       <h2 id="cartTitle" style="margin:0;font-size:16px;">Cart</h2>
       <button onclick="closeCart()" class="close-btn" id="closeCartBtn">X</button>
     </div>
+    <div id="cartClientInfo" style="font-size:12px;color:#475569;margin-bottom:6px;display:none"></div>
     <div id="cartItems"></div>
     <div class="cart-totals">
-      <div id="cartTotalUSD">Total: 0 USD</div>
+      <div id="cartSubtotal">Subtotal: 0 USD</div>
+      <div id="cartDiscount" style="font-size:12px;color:#b91c1c;display:none"></div>
+      <div id="cartTotalUSD" style="font-weight:600;margin-top:3px;">Total: 0 USD</div>
       <div id="cartTotalLBP" style="font-size:12px;color:#475569">0 LBP</div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:10px;gap:10px">
@@ -366,15 +415,19 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
 <script>
 // CONFIG
 const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
+const CLIENTS_URL = "https://yallawassel.github.io/whitepack_store/clients.json";
 const RATE_KEY = "internal_catalogue_usd_to_lbp";
 const ADMIN_PW = "whitepack123";
 const CART_KEY = "whitepack_cart_v1";
-const WA_KEY = "whitepack_whatsapp_number"; // editable from admin later
+const WA_KEY = "whitepack_whatsapp_number";
+const CLIENT_NAME_KEY = "whitepack_client_name";
 let currentLang = "en";
 let products = [];
+let clients = [];
 let cart = loadCart();
+let currentClient = { name: "", discount: 0, whatsapp: "" };
 
-// load products
+// load products + clients
 async function loadProducts(){
   try{
     const res = await fetch(DATA_URL + "?t=" + Date.now());
@@ -387,6 +440,21 @@ async function loadProducts(){
     document.getElementById("lastUpdated").textContent = currentLang==="ar"
       ? "تعذر تحميل المنتجات من GitHub"
       : "Could not load products from GitHub";
+  }
+}
+async function loadClients(){
+  try{
+    const res = await fetch(CLIENTS_URL + "?t=" + Date.now());
+    const data = await res.json();
+    clients = Array.isArray(data) ? data : (data.clients || []);
+    // try to auto-match saved client
+    const savedName = localStorage.getItem(CLIENT_NAME_KEY);
+    if(savedName){
+      document.getElementById("clientName").value = savedName;
+      matchClient(savedName);
+    }
+  }catch(err){
+    // clients optional
   }
 }
 
@@ -417,7 +485,7 @@ function render(){
 
   grid.innerHTML = "";
 
-  const filtered = products.filter(p => {
+  const filtered = products.filter((p,idx) => {
     const name = (currentLang==="ar" ? p.name_ar : p.name) || "";
     const category = (currentLang==="ar" ? p.category_ar : p.category) || "";
     const inSearch = !q || name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q));
@@ -484,7 +552,6 @@ function addToCart(idx){
   const p = products[idx];
   const qtyInput = document.getElementById("qty-" + idx);
   const qty = Number(qtyInput.value) || 1;
-
   const currentStock = Number(p.quantity) || 0;
   if(currentStock <= 0){
     alert(currentLang==="ar" ? "هذا المنتج غير متوفر" : "This product is out of stock");
@@ -495,29 +562,26 @@ function addToCart(idx){
     return;
   }
 
-  // add/update in cart
-  // ensure every cart item is unique even if SKU missing
-const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : p.name + "_" + idx;
+  // make unique id (fix for products without sku)
+  const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
 
-// find existing product in cart by uniqueId
-const existing = cart.find(item => item.id === uniqueId);
-if(existing){
-  if(existing.qty + qty > currentStock){
-    alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
-    return;
+  const existing = cart.find(item => item.id === uniqueId);
+  if(existing){
+    if(existing.qty + qty > currentStock){
+      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
+      return;
+    }
+    existing.qty += qty;
+  } else {
+    cart.push({
+      id: uniqueId,
+      sku: p.sku,
+      name: p.name,
+      name_ar: p.name_ar,
+      price: p.price,
+      qty: qty
+    });
   }
-  existing.qty += qty;
-} else {
-  cart.push({
-    id: uniqueId,
-    sku: p.sku,
-    name: p.name,
-    name_ar: p.name_ar,
-    price: p.price,
-    qty: qty
-  });
-}
-
   saveCart();
   updateCartBadge();
   alert(currentLang==="ar" ? "تمت الإضافة إلى السلة" : "Added to cart");
@@ -548,20 +612,33 @@ function renderCart(){
   const box = document.getElementById("cartItems");
   box.innerHTML = "";
   const rate = getRate();
+  let subtotal = 0;
   let total = 0;
+  const discountPct = currentClient.discount || 0;
+  let discountAmount = 0;
+
+  const clientInfoDiv = document.getElementById("cartClientInfo");
+  if(currentClient.name){
+    clientInfoDiv.style.display = "block";
+    clientInfoDiv.textContent = (currentLang==="ar" ? "العميل: " : "Client: ") + currentClient.name +
+      (discountPct ? " — " + (currentLang==="ar" ? "خصم" : "Discount") + " " + discountPct + "%" : "");
+  } else {
+    clientInfoDiv.style.display = "none";
+  }
+
   if(!cart.length){
     box.innerHTML = `<div style="color:#64748b;font-size:13px;">${currentLang==="ar" ? "السلة فارغة" : "Cart is empty"}</div>`;
   } else {
     cart.forEach((item, idx) => {
       const line = item.price ? Number(item.price) * item.qty : 0;
-      total += line;
-      const title = currentLang==="ar" ? (item.name_ar || item.name || item.sku) : (item.name || item.sku);
+      subtotal += line;
+      const title = currentLang==="ar" ? (item.name_ar || item.name || item.sku || "بدون اسم") : (item.name || item.sku || "no name");
       const div = document.createElement("div");
       div.className = "cart-item";
       div.innerHTML = `
         <div>
           <div class="cart-item-title">${title}</div>
-          <div class="cart-item-qty">${currentLang==="ar" ? "الكمية" : "Qty"}: ${item.qty} × ${item.price || 0} USD</div>
+          <div class="cart-item-qty">${currentLang==="ar" ? "الكمية" : "Qty"}: ${item.qty} × ${(item.price||0)} USD</div>
         </div>
         <div>
           <div style="font-weight:600">${line.toFixed(2)} USD</div>
@@ -571,8 +648,24 @@ function renderCart(){
       box.appendChild(div);
     });
   }
+
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
+    total = subtotal - discountAmount;
+  } else {
+    total = subtotal;
+  }
+
+  document.getElementById("cartSubtotal").textContent = (currentLang==="ar" ? "المجموع قبل الخصم: " : "Subtotal: ") + subtotal.toFixed(2) + " USD";
+  const discDiv = document.getElementById("cartDiscount");
+  if(discountPct){
+    discDiv.style.display = "block";
+    discDiv.textContent = (currentLang==="ar" ? "الخصم (" : "Discount (") + discountPct + "%): -" + discountAmount.toFixed(2) + " USD";
+  } else {
+    discDiv.style.display = "none";
+  }
   document.getElementById("cartTotalUSD").textContent = (currentLang==="ar" ? "الإجمالي: " : "Total: ") + total.toFixed(2) + " USD";
-  document.getElementById("cartTotalLBP").textContent = (Math.round(total*rate).toLocaleString("en-LB")) + " LBP";
+  document.getElementById("cartTotalLBP").textContent = Math.round(total*rate).toLocaleString("en-LB") + " LBP";
 }
 
 function removeFromCart(idx){
@@ -594,30 +687,37 @@ function checkoutCart(){
     alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
     return;
   }
-  // check stock again and deduct locally
-  let msg = currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n";
-  let total = 0;
+  // check stock and deduct locally
   const rate = getRate();
-  let ok = true;
-  cart.forEach(item => {
-    const p = products.find(x => x.sku === item.sku);
-    if(!p) return;
+  const discountPct = currentClient.discount || 0;
+  let subtotal = 0;
+  let msg = "";
+  msg += (currentLang==="ar" ? "العميل: " : "Client: ") + (currentClient.name || (currentLang==="ar" ? "غير معروف" : "Unknown")) + "\n";
+  if(discountPct){
+    msg += (currentLang==="ar" ? "الخصم: " : "Discount: ") + discountPct + "%\n\n";
+  } else {
+    msg += "\n";
+  }
+  msg += (currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n");
+
+  // check stock
+  for(const item of cart){
+    const p = products.find(x => x.sku === item.sku) || products.find(x => (x.name===item.name));
+    if(!p) continue;
     const stock = Number(p.quantity) || 0;
     if(item.qty > stock){
-      ok = false;
+      alert(currentLang==="ar" ? "الكمية المطلوبة غير متوفرة: " + (p.name_ar || p.name) : "Requested qty not available: " + (p.name || p.name_ar));
+      return;
     }
-  });
-  if(!ok){
-    alert(currentLang==="ar" ? "أحد المنتجات غير متوفر بالكمية المطلوبة. عدّل الكمية." : "Some products are not available in that quantity. Please adjust.");
-    return;
   }
 
+  // build lines
   cart.forEach(item => {
-    const p = products.find(x => x.sku === item.sku);
-    const title = currentLang==="ar" ? (p?.name_ar || p?.name || item.sku) : (p?.name || item.sku);
-    msg += `- ${title} × ${item.qty}\n`;
-    const line = item.price ? Number(item.price) * item.qty : 0;
-    total += line;
+    const p = products.find(x => x.sku === item.sku) || products.find(x => (x.name===item.name));
+    const title = currentLang==="ar" ? (p?.name_ar || p?.name || item.name_ar || item.name || item.sku) : (p?.name || item.name || item.sku);
+    const line = (item.price ? Number(item.price) : 0) * item.qty;
+    subtotal += line;
+    msg += `- ${title} × ${item.qty} = ${line.toFixed(2)} USD\n`;
     // deduct locally
     if(p){
       p.quantity = (Number(p.quantity) || 0) - item.qty;
@@ -625,18 +725,71 @@ function checkoutCart(){
     }
   });
 
-  msg += currentLang==="ar"
+  let total = subtotal;
+  let discountAmount = 0;
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
+    total = subtotal - discountAmount;
+    msg += (currentLang==="ar"
+      ? `المجموع قبل الخصم: ${subtotal.toFixed(2)} USD\n`
+      : `Subtotal: ${subtotal.toFixed(2)} USD\n`);
+    msg += (currentLang==="ar"
+      ? `الخصم (${discountPct}%): -${discountAmount.toFixed(2)} USD\n`
+      : `Discount (${discountPct}%): -${discountAmount.toFixed(2)} USD\n`);
+  }
+  msg += (currentLang==="ar"
     ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`
-    : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`;
+    : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`);
 
   // open WhatsApp
   const wa = localStorage.getItem(WA_KEY) || "96181085811";
   const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, "_blank");
 
-  // clear cart + re-render products (to show new stock)
+  // clear cart + re-render
   clearCart();
   render();
+}
+
+// CLIENT HANDLING
+const clientInput = document.getElementById("clientName");
+clientInput.addEventListener("change", e => {
+  const name = e.target.value.trim();
+  matchClient(name);
+});
+clientInput.addEventListener("blur", e => {
+  const name = e.target.value.trim();
+  matchClient(name);
+});
+
+function matchClient(name){
+  if(!name){
+    currentClient = { name:"", discount:0, whatsapp:"" };
+    document.getElementById("clientDiscountBadge").style.display = "none";
+    document.getElementById("clientNotFound").style.display = "none";
+    localStorage.removeItem(CLIENT_NAME_KEY);
+    return;
+  }
+  const found = clients.find(c => (c.name || "").toLowerCase() === name.toLowerCase());
+  if(found){
+    currentClient = {
+      name: found.name,
+      discount: Number(found.discount) || 0,
+      whatsapp: found.whatsapp || ""
+    };
+    document.getElementById("clientDiscountBadge").style.display = "inline-block";
+    document.getElementById("clientDiscountBadge").textContent =
+      (currentLang==="ar" ? "خصم: " : "Discount: ") + currentClient.discount + "%";
+    document.getElementById("clientNotFound").style.display = "none";
+    localStorage.setItem(CLIENT_NAME_KEY, currentClient.name);
+  } else {
+    currentClient = { name, discount:0, whatsapp:"" };
+    document.getElementById("clientDiscountBadge").style.display = "none";
+    document.getElementById("clientNotFound").style.display = "inline-block";
+    localStorage.setItem(CLIENT_NAME_KEY, name);
+  }
+  // refresh cart to show new discount
+  renderCart();
 }
 
 // ADMIN
@@ -648,8 +801,8 @@ adminGear.addEventListener("click", () => {
     adminFlag.style.display = "inline-block";
     document.getElementById("adminControls").style.display = "block";
     alert(currentLang==="ar"
-      ? "تم تفعيل لوحة التحكم. لتغيير رقم الواتساب أو الأسعار استخدم admin.html و ارفع products.json."
-      : "Admin enabled. To change WhatsApp or prices use admin.html and upload products.json.");
+      ? "تم تفعيل لوحة التحكم. لتحديث المنتجات والعملاء ارفع products.json و clients.json إلى GitHub."
+      : "Admin enabled. To update products and clients, upload products.json and clients.json to GitHub.");
   } else {
     alert(currentLang==="ar" ? "كلمة السر غير صحيحة" : "Wrong password");
   }
@@ -661,6 +814,7 @@ document.getElementById("langToggle").addEventListener("click", () => {
   applyLang();
   buildCategories();
   render();
+  renderCart();
 });
 
 function applyLang(){
@@ -675,6 +829,7 @@ function applyLang(){
     document.getElementById("closeCartBtn").textContent = "إغلاق";
     document.getElementById("clearCartBtn").textContent = "مسح";
     document.getElementById("checkoutBtn").textContent = "ارسال الى واتساب";
+    document.getElementById("clientNameLabel").textContent = "اسم العميل";
   } else {
     header.dir = "ltr";
     document.getElementById("langToggle").textContent = "AR";
@@ -685,6 +840,7 @@ function applyLang(){
     document.getElementById("closeCartBtn").textContent = "Close";
     document.getElementById("clearCartBtn").textContent = "Clear";
     document.getElementById("checkoutBtn").textContent = "Send to WhatsApp";
+    document.getElementById("clientNameLabel").textContent = "Client name";
   }
   setLastUpdated();
 }
@@ -697,6 +853,7 @@ document.getElementById("filterCat").addEventListener("change", render);
 applyLang();
 updateCartBadge();
 loadProducts();
+loadClients();
 </script>
 </body>
 </html>

@@ -10,7 +10,7 @@
     "price": 1.5,
     "quantity": 200,
     "image": "https://www.globepackaging.co.uk/images/Coffee%20cups%20hot%20drinks%2012oz%20globe%20packaging.jpg",
-    "whatsapp": 81085811
+    "whatsapp": ""
   },
   {
     "sku": "",
@@ -23,19 +23,6 @@
     "price": 3,
     "quantity": 2,
     "image": "https://baytkon.com/cdn/shop/files/IMG-8780.jpg?v=1754994406&width=823",
-    "whatsapp": ""
-  },
-  {
-    "sku": "",
-    "name": "coffee paper cup 10pc",
-    "name_ar": "",
-    "category": "",
-    "category_ar": "",
-    "description": "5 oz",
-    "description_ar": "",
-    "price": 2.5,
-    "quantity": 400,
-    "image": "https://m.media-amazon.com/images/I/71c35h7ltDL._AC_SL1500_.jpg",
     "whatsapp": ""
   }
 ]
