@@ -496,22 +496,28 @@ function addToCart(idx){
   }
 
   // add/update in cart
-  const existing = cart.find(item => item.sku === p.sku);
-  if(existing){
-    if(existing.qty + qty > currentStock){
-      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
-      return;
-    }
-    existing.qty += qty;
-  } else {
-    cart.push({
-      sku: p.sku,
-      name: p.name,
-      name_ar: p.name_ar,
-      price: p.price,
-      qty: qty
-    });
+  // ensure every cart item is unique even if SKU missing
+const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : p.name + "_" + idx;
+
+// find existing product in cart by uniqueId
+const existing = cart.find(item => item.id === uniqueId);
+if(existing){
+  if(existing.qty + qty > currentStock){
+    alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
+    return;
   }
+  existing.qty += qty;
+} else {
+  cart.push({
+    id: uniqueId,
+    sku: p.sku,
+    name: p.name,
+    name_ar: p.name_ar,
+    price: p.price,
+    qty: qty
+  });
+}
+
   saveCart();
   updateCartBadge();
   alert(currentLang==="ar" ? "تمت الإضافة إلى السلة" : "Added to cart");
