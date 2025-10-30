@@ -1,26 +1,26 @@
 [
   {
-    "sku": "SKU-1",
+    "sku": "",
     "name": "paper cups",
     "name_ar": "كبيات كرتون",
     "category": "paper",
     "category_ar": "",
-    "description": "",
+    "description": "12 oz",
     "description_ar": "",
-    "price": "",
+    "price": 1.5,
     "quantity": 200,
     "image": "https://www.globepackaging.co.uk/images/Coffee%20cups%20hot%20drinks%2012oz%20globe%20packaging.jpg",
     "whatsapp": 81085811
   },
   {
-    "sku": "SKU-2",
+    "sku": "",
     "name": "trash bags ",
     "name_ar": "أكياس زبالة",
     "category": "nylon",
     "category_ar": "",
-    "description": "",
+    "description": "small",
     "description_ar": "",
-    "price": "",
+    "price": 3,
     "quantity": 2,
     "image": "https://baytkon.com/cdn/shop/files/IMG-8780.jpg?v=1754994406&width=823",
     "whatsapp": ""
