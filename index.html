@@ -770,7 +770,11 @@ function matchClient(name){
     localStorage.removeItem(CLIENT_NAME_KEY);
     return;
   }
-  const found = clients.find(c => (c.name || "").toLowerCase() === name.toLowerCase());
+    const found = clients.find(c =>
+    (c.name && c.name.toLowerCase() === name.toLowerCase()) ||
+    (c.whatsapp && c.whatsapp.replace(/\D/g,"").endsWith(name.replace(/\D/g,"")))
+  );
+
   if(found){
     currentClient = {
       name: found.name,
