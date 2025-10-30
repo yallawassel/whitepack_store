@@ -11,5 +11,18 @@
     "quantity": 200,
     "image": "https://www.globepackaging.co.uk/images/Coffee%20cups%20hot%20drinks%2012oz%20globe%20packaging.jpg",
     "whatsapp": 81085811
+  },
+  {
+    "sku": "SKU-2",
+    "name": "trash bags ",
+    "name_ar": "أكياس زبالة",
+    "category": "nylon",
+    "category_ar": "",
+    "description": "",
+    "description_ar": "",
+    "price": "",
+    "quantity": 2,
+    "image": "https://baytkon.com/cdn/shop/files/IMG-8780.jpg?v=1754994406&width=823",
+    "whatsapp": ""
   }
 ]
