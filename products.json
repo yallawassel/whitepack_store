@@ -1,28 +1,28 @@
 [
   {
-    "sku": "SKU-1",
-    "name": "paper cups",
-    "name_ar": "كبيات كرتون",
-    "category": "paper",
-    "category_ar": "",
-    "description": "",
-    "description_ar": "",
-    "price": "",
-    "quantity": 200,
-    "image": "https://www.globepackaging.co.uk/images/Coffee%20cups%20hot%20drinks%2012oz%20globe%20packaging.jpg",
-    "whatsapp": 81085811
+    "sku": "KRTF-01",
+    "name": "Interfold White",
+    "name_ar": "مناديل انترفولد بيضاء",
+    "category": "Paper & Tissue",
+    "category_ar": "مناديل وورقية",
+    "description": "High quality interfold tissue pack",
+    "description_ar": "علبة مناديل عالية الجودة",
+    "price": 2.5,
+    "quantity": 5,
+    "image": "https://via.placeholder.com/600x600?text=Interfold",
+    "whatsapp": "96181085811"
   },
   {
-    "sku": "SKU-2",
-    "name": "trash bags ",
-    "name_ar": "أكياس زبالة",
-    "category": "nylon",
-    "category_ar": "",
-    "description": "",
-    "description_ar": "",
-    "price": "",
-    "quantity": 2,
-    "image": "https://baytkon.com/cdn/shop/files/IMG-8780.jpg?v=1754994406&width=823",
-    "whatsapp": ""
+    "sku": "BAG-100",
+    "name": "Kraft Paper Bag",
+    "name_ar": "كيس كرافت",
+    "category": "Bags",
+    "category_ar": "أكياس",
+    "description": "Eco-friendly kraft bag",
+    "description_ar": "كيس كرافت صديق للبيئة",
+    "price": 1.2,
+    "quantity": 0,
+    "image": "https://via.placeholder.com/600x600?text=Kraft+Bag",
+    "whatsapp": "96181085811"
   }
 ]

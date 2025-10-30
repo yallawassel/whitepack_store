@@ -63,8 +63,35 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   cursor:pointer;
   font-weight:600;
 }
+.cart-btn {
+  border:none;
+  background:#ffffff;
+  color:#166534;
+  border-radius:9999px;
+  padding:3px 12px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.cart-badge {
+  background:#166534;
+  color:#fff;
+  border-radius:9999px;
+  min-width:18px;
+  text-align:center;
+  font-size:11px;
+  padding:0 4px;
+}
 
 .container { padding: 16px; }
+#lastUpdated {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 10px;
+}
 .controls {
   display: flex;
   gap: 8px;
@@ -83,6 +110,7 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   border-radius: 8px;
   border: 1px solid rgba(0,0,0,0.06);
   font-size: .85rem;
+  background:#fff;
 }
 .grid {
   display: grid;
@@ -97,7 +125,7 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 240px;
+  min-height: 270px;
   overflow: hidden;
 }
 .card-img {
@@ -114,21 +142,15 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
 .card-img img {
   width:100%;
   height:100%;
-  object-fit: cover; /* crop to square */
+  object-fit: cover;
 }
 .card h3 { margin: 0; font-size: 15px; color: #2f5f2d; }
-.card p { margin: 0; color: #4f6a4b; font-size: 12.5px; flex: 1; }
-.card .meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-top:6px;
-}
+.card p { margin: 0; color: #4f6a4b; font-size: 12.5px; min-height:34px; }
 .price {
   font-weight:700;
   color:#2f5f2d;
   font-size:.85rem;
+  margin-top:4px;
 }
 .price small {
   display:block;
@@ -136,20 +158,51 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   font-weight:400;
   font-size:.65rem;
 }
-.btn {
-  background: var(--card);
-  border: 1px solid rgba(0,0,0,0.06);
-  padding: 6px 10px;
-  border-radius: 10px;
-  color: var(--muted);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 12px;
+.qty-row {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-top:6px;
 }
-.btn.primary {
+.qty-box {
+  display:flex;
+  gap:3px;
+  align-items:center;
+}
+.qty-box button {
+  width:24px; height:26px;
+  border:none;
+  background:#e2e8f0;
+  border-radius:6px;
+  cursor:pointer;
+}
+.qty-box input {
+  width:40px;
+  text-align:center;
+  border:1px solid #e2e8f0;
+  border-radius:6px;
+  height:26px;
+}
+.add-btn {
   background: linear-gradient(90deg, var(--accent2), var(--accent));
-  color: #fff;
-  border: none;
+  border:none;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  cursor:pointer;
+  flex:1;
+}
+.add-btn.disabled {
+  background:#e2e8f0;
+  color:#94a3b8;
+  cursor:not-allowed;
+}
+.out-stock {
+  color:#b91c1c;
+  font-size:12px;
+  font-weight:600;
+  margin-top:4px;
 }
 .footer {
   background: #d8f0d8;
@@ -168,11 +221,6 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   background:#e8ffe8;
   color:#133a12;
   border:1px solid rgba(0,0,0,0.04)
-}
-#lastUpdated {
-  font-size: 12px;
-  color: #475569;
-  margin-bottom: 10px;
 }
 
 /* admin gear */
@@ -194,9 +242,9 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   z-index: 9999;
 }
 #adminGear:hover { opacity: 1; transform: scale(1.05); }
-
 #adminControls { display:none; margin-bottom:12px; }
 
+/* modal (cart) */
 .modal {
   position: fixed;
   inset: 0;
@@ -213,16 +261,54 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   padding: 14px;
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y:auto;
+}
+.cart-item {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  margin-bottom:6px;
+  border-bottom:1px solid #e2e8f0;
+  padding-bottom:4px;
+}
+.cart-item-title {
+  font-size:13px;
+  font-weight:600;
+}
+.cart-item-qty {
+  font-size:12px;
+  color:#475569;
+}
+.cart-totals {
+  margin-top:10px;
+  border-top:1px solid #e2e8f0;
+  padding-top:10px;
+}
+.close-btn {
+  border:none;
+  background:#e2e8f0;
+  padding:4px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.checkout-btn {
+  background:#166534;
+  color:#fff;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
 }
 @media(max-width:600px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
   header{flex-wrap:wrap}
   .topbar{align-items:flex-start}
 }
 </style>
 </head>
 <body>
-
 <header id="topHeader" dir="ltr">
   <div class="logo">WP</div>
   <div>
@@ -231,10 +317,9 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
   </div>
   <div class="topbar">
     <div><strong id="waLabel">WhatsApp:</strong> <a id="waLink" href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
-    <div><strong id="emailLabel">Email:</strong> <a id="mailLink" href="mailto:whitepack.lb@hotmail.com">whitepack.lb@hotmail.com</a></div>
-    <div><strong id="addrLabel">Address:</strong> <span id="companyAddress">(add in settings)</span></div>
     <div class="top-actions">
       <button id="langToggle" class="lang-btn">AR</button>
+      <button id="cartToggle" class="cart-btn">🛒 <span id="cartCount" class="cart-badge">0</span></button>
       <span id="adminFlag">ADMIN</span>
     </div>
   </div>
@@ -242,29 +327,40 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
 
 <main class="container">
   <div id="lastUpdated">Last updated: --</div>
-
   <div id="adminControls">
-    <button class="btn primary" onclick="alert('Use admin.html to upload Excel and export products.json, then upload to GitHub.')">Admin info</button>
+    <button class="add-btn" onclick="alert('Use admin.html to upload Excel and export products.json, then upload to GitHub.')">Admin info</button>
   </div>
-
-  <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div class="controls">
     <input id="search" placeholder="Search products..." />
     <select id="filterCat">
       <option value="">All categories</option>
     </select>
   </div>
-
-  <div id="grid" class="grid" aria-live="polite"></div>
-
-  <div class="footer">
-    <div id="footerText"><strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a> • Email: <a href="mailto:whitepack.lb@hotmail.com">whitepack.lb@hotmail.com</a></div>
+  <div id="grid" class="grid"></div>
+  <div class="footer" id="footerText">
+    <strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a>
   </div>
 </main>
 
 <div id="adminGear" title="Admin (press Alt+Shift+W)">⚙️</div>
 
-<div id="modal" class="modal" role="dialog" aria-modal="true">
-  <div class="panel" id="modalPanel"></div>
+<!-- CART MODAL -->
+<div id="cartModal" class="modal" aria-modal="true" role="dialog">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 id="cartTitle" style="margin:0;font-size:16px;">Cart</h2>
+      <button onclick="closeCart()" class="close-btn" id="closeCartBtn">X</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-totals">
+      <div id="cartTotalUSD">Total: 0 USD</div>
+      <div id="cartTotalLBP" style="font-size:12px;color:#475569">0 LBP</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;gap:10px">
+      <button onclick="clearCart()" class="close-btn" id="clearCartBtn">Clear</button>
+      <button onclick="checkoutCart()" class="checkout-btn" id="checkoutBtn">Send to WhatsApp</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -272,14 +368,17 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
 const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
 const RATE_KEY = "internal_catalogue_usd_to_lbp";
 const ADMIN_PW = "whitepack123";
+const CART_KEY = "whitepack_cart_v1";
+const WA_KEY = "whitepack_whatsapp_number"; // editable from admin later
 let currentLang = "en";
 let products = [];
+let cart = loadCart();
 
+// load products
 async function loadProducts(){
   try{
     const res = await fetch(DATA_URL + "?t=" + Date.now());
     const data = await res.json();
-    // assume it's an array
     products = Array.isArray(data) ? data : (data.products || []);
     setLastUpdated();
     buildCategories();
@@ -293,11 +392,7 @@ async function loadProducts(){
 
 function setLastUpdated(){
   const now = new Date();
-  const formatted = now.getFullYear() + "-" +
-    String(now.getMonth()+1).padStart(2,"0") + "-" +
-    String(now.getDate()).padStart(2,"0") + " " +
-    String(now.getHours()).padStart(2,"0") + ":" +
-    String(now.getMinutes()).padStart(2,"0");
+  const formatted = now.toISOString().slice(0,16).replace("T"," ");
   document.getElementById("lastUpdated").textContent =
     (currentLang==="ar" ? "آخر تحديث: " : "Last updated: ") + formatted + " (GitHub)";
 }
@@ -310,7 +405,7 @@ function getRate(){
 function buildCategories(){
   const sel = document.getElementById("filterCat");
   const cats = Array.from(new Set(products.map(p => currentLang==="ar" ? p.category_ar : p.category).filter(Boolean))).sort();
-  sel.innerHTML = `<option value="">${currentLang==="ar" ? "كل الاصناف" : "All categories"}</option>` + 
+  sel.innerHTML = `<option value="">${currentLang==="ar" ? "كل الاصناف" : "All categories"}</option>` +
     cats.map(c => `<option value="${c}">${c}</option>`).join("");
 }
 
@@ -330,13 +425,13 @@ function render(){
     return inSearch && inCat;
   });
 
-  filtered.forEach(p => {
+  filtered.forEach((p, idx) => {
     const priceUSD = p.price ? Number(p.price) : null;
     const priceLBP = priceUSD ? Math.round(priceUSD * rate).toLocaleString("en-LB") : null;
     const name = currentLang==="ar" ? (p.name_ar || p.name || "(بدون اسم)") : (p.name || "(no name)");
     const desc = currentLang==="ar" ? (p.description_ar || "") : (p.description || "");
     const catName = currentLang==="ar" ? (p.category_ar || "-") : (p.category || "-");
-    const wa = p.whatsapp ? `https://wa.me/${p.whatsapp}?text=${encodeURIComponent((currentLang==="ar"?"مرحبا، أريد: ":"Hello, I want: ") + name)}` : "#";
+    const inStock = !p.quantity ? false : Number(p.quantity) > 0;
 
     const card = document.createElement("div");
     card.className = "card";
@@ -346,14 +441,24 @@ function render(){
       </div>
       <h3>${name}</h3>
       <p>${desc}</p>
-      <div class="meta">
-        <div class="price">
-          ${priceUSD ? priceUSD + " USD" : ""}
-          ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
-        </div>
-        <button class="btn" onclick="window.open('${wa}', '_blank')">${currentLang==="ar" ? "واتساب" : "WhatsApp"}</button>
+      <div class="price">
+        ${priceUSD ? priceUSD + " USD" : ""}
+        ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
       </div>
-      <div style="font-size:11px;color:#6b6b6b;margin-top:4px">${currentLang==="ar" ? "الصنف: " : "Category: "}${catName}</div>
+      ${!inStock ? `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>` : ""}
+      <div class="qty-row">
+        <div class="qty-box">
+          <button onclick="changeQty(${idx}, -1)">-</button>
+          <input id="qty-${idx}" type="number" min="1" value="1" />
+          <button onclick="changeQty(${idx}, 1)">+</button>
+        </div>
+        <button class="add-btn ${!inStock ? "disabled":""}" onclick="addToCart(${idx})" ${!inStock ? "disabled" : ""}>
+          ${currentLang==="ar" ? "إضافة" : "Add to Cart"}
+        </button>
+      </div>
+      <div style="font-size:11px;color:#6b6b6b;margin-top:4px">
+        ${currentLang==="ar" ? "الصنف: " : "Category: "}${catName}
+      </div>
     `;
     grid.appendChild(card);
   });
@@ -366,9 +471,185 @@ function render(){
   }
 }
 
-document.getElementById("search").addEventListener("input", render);
-document.getElementById("filterCat").addEventListener("change", render);
+function changeQty(idx, delta){
+  const inp = document.getElementById("qty-" + idx);
+  if(!inp) return;
+  let v = Number(inp.value) || 1;
+  v += delta;
+  if(v < 1) v = 1;
+  inp.value = v;
+}
 
+function addToCart(idx){
+  const p = products[idx];
+  const qtyInput = document.getElementById("qty-" + idx);
+  const qty = Number(qtyInput.value) || 1;
+
+  const currentStock = Number(p.quantity) || 0;
+  if(currentStock <= 0){
+    alert(currentLang==="ar" ? "هذا المنتج غير متوفر" : "This product is out of stock");
+    return;
+  }
+  if(qty > currentStock){
+    alert(currentLang==="ar" ? "الكمية المطلوبة أكبر من المخزون" : "Requested quantity exceeds stock");
+    return;
+  }
+
+  // add/update in cart
+  const existing = cart.find(item => item.sku === p.sku);
+  if(existing){
+    if(existing.qty + qty > currentStock){
+      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
+      return;
+    }
+    existing.qty += qty;
+  } else {
+    cart.push({
+      sku: p.sku,
+      name: p.name,
+      name_ar: p.name_ar,
+      price: p.price,
+      qty: qty
+    });
+  }
+  saveCart();
+  updateCartBadge();
+  alert(currentLang==="ar" ? "تمت الإضافة إلى السلة" : "Added to cart");
+}
+
+function loadCart(){
+  const raw = localStorage.getItem(CART_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveCart(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+function updateCartBadge(){
+  document.getElementById("cartCount").textContent = cart.reduce((s,i)=>s+i.qty, 0);
+}
+
+// CART MODAL
+const cartModal = document.getElementById("cartModal");
+document.getElementById("cartToggle").addEventListener("click", openCart);
+function openCart(){
+  cartModal.style.display = "flex";
+  renderCart();
+}
+function closeCart(){
+  cartModal.style.display = "none";
+}
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  box.innerHTML = "";
+  const rate = getRate();
+  let total = 0;
+  if(!cart.length){
+    box.innerHTML = `<div style="color:#64748b;font-size:13px;">${currentLang==="ar" ? "السلة فارغة" : "Cart is empty"}</div>`;
+  } else {
+    cart.forEach((item, idx) => {
+      const line = item.price ? Number(item.price) * item.qty : 0;
+      total += line;
+      const title = currentLang==="ar" ? (item.name_ar || item.name || item.sku) : (item.name || item.sku);
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        <div>
+          <div class="cart-item-title">${title}</div>
+          <div class="cart-item-qty">${currentLang==="ar" ? "الكمية" : "Qty"}: ${item.qty} × ${item.price || 0} USD</div>
+        </div>
+        <div>
+          <div style="font-weight:600">${line.toFixed(2)} USD</div>
+          <button class="close-btn" onclick="removeFromCart(${idx})">${currentLang==="ar" ? "حذف" : "Remove"}</button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  }
+  document.getElementById("cartTotalUSD").textContent = (currentLang==="ar" ? "الإجمالي: " : "Total: ") + total.toFixed(2) + " USD";
+  document.getElementById("cartTotalLBP").textContent = (Math.round(total*rate).toLocaleString("en-LB")) + " LBP";
+}
+
+function removeFromCart(idx){
+  cart.splice(idx,1);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function clearCart(){
+  cart = [];
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function checkoutCart(){
+  if(!cart.length){
+    alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
+    return;
+  }
+  // check stock again and deduct locally
+  let msg = currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n";
+  let total = 0;
+  const rate = getRate();
+  let ok = true;
+  cart.forEach(item => {
+    const p = products.find(x => x.sku === item.sku);
+    if(!p) return;
+    const stock = Number(p.quantity) || 0;
+    if(item.qty > stock){
+      ok = false;
+    }
+  });
+  if(!ok){
+    alert(currentLang==="ar" ? "أحد المنتجات غير متوفر بالكمية المطلوبة. عدّل الكمية." : "Some products are not available in that quantity. Please adjust.");
+    return;
+  }
+
+  cart.forEach(item => {
+    const p = products.find(x => x.sku === item.sku);
+    const title = currentLang==="ar" ? (p?.name_ar || p?.name || item.sku) : (p?.name || item.sku);
+    msg += `- ${title} × ${item.qty}\n`;
+    const line = item.price ? Number(item.price) * item.qty : 0;
+    total += line;
+    // deduct locally
+    if(p){
+      p.quantity = (Number(p.quantity) || 0) - item.qty;
+      if(p.quantity < 0) p.quantity = 0;
+    }
+  });
+
+  msg += currentLang==="ar"
+    ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`
+    : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`;
+
+  // open WhatsApp
+  const wa = localStorage.getItem(WA_KEY) || "96181085811";
+  const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, "_blank");
+
+  // clear cart + re-render products (to show new stock)
+  clearCart();
+  render();
+}
+
+// ADMIN
+const adminGear = document.getElementById("adminGear");
+const adminFlag = document.getElementById("adminFlag");
+adminGear.addEventListener("click", () => {
+  const pw = prompt(currentLang==="ar" ? "ادخل كلمة السر:" : "Enter admin password:");
+  if(pw === ADMIN_PW){
+    adminFlag.style.display = "inline-block";
+    document.getElementById("adminControls").style.display = "block";
+    alert(currentLang==="ar"
+      ? "تم تفعيل لوحة التحكم. لتغيير رقم الواتساب أو الأسعار استخدم admin.html و ارفع products.json."
+      : "Admin enabled. To change WhatsApp or prices use admin.html and upload products.json.");
+  } else {
+    alert(currentLang==="ar" ? "كلمة السر غير صحيحة" : "Wrong password");
+  }
+});
+
+// LANG
 document.getElementById("langToggle").addEventListener("click", () => {
   currentLang = currentLang === "en" ? "ar" : "en";
   applyLang();
@@ -383,41 +664,32 @@ function applyLang(){
     document.getElementById("langToggle").textContent = "EN";
     document.getElementById("search").placeholder = "بحث عن منتج...";
     document.getElementById("waLabel").textContent = "واتساب:";
-    document.getElementById("emailLabel").textContent = "ايميل:";
-    document.getElementById("addrLabel").textContent = "العنوان:";
     document.getElementById("companySlogan").textContent = "أفضل جودة";
-    document.getElementById("lastUpdated").textContent = "آخر تحديث: —";
+    document.getElementById("cartTitle").textContent = "السلة";
+    document.getElementById("closeCartBtn").textContent = "إغلاق";
+    document.getElementById("clearCartBtn").textContent = "مسح";
+    document.getElementById("checkoutBtn").textContent = "ارسال الى واتساب";
   } else {
     header.dir = "ltr";
     document.getElementById("langToggle").textContent = "AR";
     document.getElementById("search").placeholder = "Search products...";
     document.getElementById("waLabel").textContent = "WhatsApp:";
-    document.getElementById("emailLabel").textContent = "Email:";
-    document.getElementById("addrLabel").textContent = "Address:";
     document.getElementById("companySlogan").textContent = "Best Quality";
-    document.getElementById("lastUpdated").textContent = "Last updated: —";
+    document.getElementById("cartTitle").textContent = "Cart";
+    document.getElementById("closeCartBtn").textContent = "Close";
+    document.getElementById("clearCartBtn").textContent = "Clear";
+    document.getElementById("checkoutBtn").textContent = "Send to WhatsApp";
   }
   setLastUpdated();
 }
 
-// admin access (same password)
-const adminGear = document.getElementById("adminGear");
-const adminFlag = document.getElementById("adminFlag");
-adminGear.addEventListener("click", () => {
-  const pw = prompt(currentLang==="ar" ? "ادخل كلمة السر:" : "Enter admin password:");
-  if(pw === ADMIN_PW){
-    adminFlag.style.display = "inline-block";
-    document.getElementById("adminControls").style.display = "block";
-    alert(currentLang==="ar"
-      ? "تم تفعيل لوحة التحكم. لتحميل المنتجات استخدم admin.html و ارفع ملف products.json إلى GitHub."
-      : "Admin enabled. To update products use admin.html and upload products.json to GitHub.");
-  } else {
-    alert(currentLang==="ar" ? "كلمة السر غير صحيحة" : "Wrong password");
-  }
-});
+// search + filter
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filterCat").addEventListener("change", render);
 
-// initial
+// init
 applyLang();
+updateCartBadge();
 loadProducts();
 </script>
 </body>
