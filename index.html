@@ -1,229 +1,424 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>WhitePack Catalogue</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root {
-      --bg:#f3faf4;
-      --card:#ffffff;
-      --accent:#2f9e44;
-      --accent-light:#d9f2de;
-      --text:#0f172a;
-      --muted:#64748b;
-      --danger:#ef4444;
-    }
-    body { margin:0; background:var(--bg); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    header {
-      background:#fff;
-      position:sticky;
-      top:0;
-      z-index:10;
-      padding:.5rem .8rem;
-      box-shadow:0 4px 20px rgba(0,0,0,.04);
-      display:flex;
-      gap:.5rem;
-      align-items:center;
-    }
-    header h1 { font-size:1rem; margin:0; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    input[type=search], select {
-      border:1px solid #e2e8f0;
-      border-radius:.6rem;
-      padding:.35rem .6rem;
-      font-size:.85rem;
-      background:#fff;
-    }
-    #langBtn {
-      border:none; background:var(--accent); color:#fff;
-      border-radius:.6rem; padding:.35rem .6rem; cursor:pointer; font-size:.75rem; font-weight:600;
-    }
-    #products { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; padding:1rem; }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WhitePack — Online Catalogue</title>
+<style>
+:root {
+  --bg: #f5fff8;
+  --accent: #3b7a3a;
+  --accent2: #6ecf6e;
+  --muted: #4b6b4b;
+  --card: #fff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+  background: var(--bg);
+  color: #213;
+  line-height: 1.35;
+}
+header {
+  background: linear-gradient(90deg, #a6e8a6, #4ea84e);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo {
+  width: 56px;
+  height: 44px;
+  border-radius: 8px;
+  background: #3b7a3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+h1 { margin: 0; font-size: 20px; color: #1f401d; }
+.topbar {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  font-size: 13px;
+  color: #133a12;
+}
+.topbar a { color: #133a12; text-decoration: none; font-weight: 600; }
+.top-actions { display:flex; gap:6px; align-items:center; }
 
-    .card {
-      background:var(--card);
-      border-radius:1rem;
-      overflow:hidden;
-      box-shadow:0 10px 30px rgba(14,159,110,.08);
-      display:flex;
-      flex-direction:column;
-      min-height:280px;
-      border:1px solid rgba(47,158,68,.04);
-    }
-    .thumb {
-  width:100%;
-  aspect-ratio:1/1; /* square shape */
-  background:#f8fafc;
-  background-size:cover;
-  background-position:center;
-  border-radius:0.75rem; /* soft rounded corners */
-  overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+.lang-btn {
+  border:none;
+  background:#fff;
+  color:#166534;
+  border-radius:9999px;
+  padding:2px 10px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
 }
 
-    .inner { padding:.8rem; flex:1; display:flex; flex-direction:column; gap:.4rem; }
-    .name { font-weight:700; color:#064e3b; }
-    .name.ar { direction:rtl; font-family: "Tahoma", system-ui, sans-serif; }
-    .desc { font-size:.7rem; color:var(--muted); }
-    .desc.ar { direction:rtl; }
-    .price { color:var(--accent); font-weight:600; font-size:.8rem; }
-    .price small { display:block; color:#4b5563; font-weight:400; font-size:.7rem; }
-    .qty { font-size:.7rem; color:#475569; }
-    .actions { display:flex; gap:.4rem; margin-top:auto; }
-    .btn {
-      flex:1;
-      text-align:center;
-      background:var(--accent);
-      color:#fff;
-      border:none;
-      border-radius:.5rem;
-      padding:.35rem .4rem;
-      font-size:.7rem;
-      text-decoration:none;
-      display:inline-block;
-    }
-    .btn.outline {
-      background:#ecfdf3;
-      color:#166534;
-      border:1px solid rgba(22,101,52,.4);
-    }
-    .empty { padding:1.5rem; text-align:center; color:#64748b; }
-    .errorbar {
-      background:#fef2f2; color:#991b1b; text-align:center; padding:.6rem .5rem; font-size:.75rem;
-    }
-    @media (min-width:700px){
-      header { gap:1rem; }
-      header h1 { font-size:1.1rem; }
-    }
-  </style>
+.container { padding: 16px; }
+.controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+#search {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: .9rem;
+}
+#filterCat {
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: .85rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 240px;
+  overflow: hidden;
+}
+.card-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card-img img {
+  width:100%;
+  height:100%;
+  object-fit: cover; /* crop to square */
+}
+.card h3 { margin: 0; font-size: 15px; color: #2f5f2d; }
+.card p { margin: 0; color: #4f6a4b; font-size: 12.5px; flex: 1; }
+.card .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top:6px;
+}
+.price {
+  font-weight:700;
+  color:#2f5f2d;
+  font-size:.85rem;
+}
+.price small {
+  display:block;
+  color:#557;
+  font-weight:400;
+  font-size:.65rem;
+}
+.btn {
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 10px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn.primary {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: #fff;
+  border: none;
+}
+.footer {
+  background: #d8f0d8;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: #1e3a1e;
+  margin-top: 18px;
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
+#adminFlag {
+  display:none;
+  font-size:13px;
+  padding:4px 6px;
+  border-radius:8px;
+  background:#e8ffe8;
+  color:#133a12;
+  border:1px solid rgba(0,0,0,0.04)
+}
+#lastUpdated {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+/* admin gear */
+#adminGear {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffffaa;
+  border: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.12;
+  transition: opacity .18s, transform .12s;
+  z-index: 9999;
+}
+#adminGear:hover { opacity: 1; transform: scale(1.05); }
+
+#adminControls { display:none; margin-bottom:12px; }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2,6,23,0.45);
+  z-index: 10000;
+}
+.modal .panel {
+  width: 96%;
+  max-width: 540px;
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+@media(max-width:600px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  header{flex-wrap:wrap}
+  .topbar{align-items:flex-start}
+}
+</style>
 </head>
 <body>
-  <div id="error" class="errorbar" style="display:none;"></div>
-  <header id="topbar" dir="ltr">
-    <h1 id="title">🍃 WhitePack Catalogue</h1>
-    <input type="search" id="search" placeholder="Search..." />
-    <select id="category">
-      <option value="">All</option>
+
+<header id="topHeader" dir="ltr">
+  <div class="logo">WP</div>
+  <div>
+    <h1 id="companyName">White Pack</h1>
+    <div id="companySlogan" style="font-size:12px;color:#2b5a2b">Best Quality</div>
+  </div>
+  <div class="topbar">
+    <div><strong id="waLabel">WhatsApp:</strong> <a id="waLink" href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
+    <div><strong id="emailLabel">Email:</strong> <a id="mailLink" href="mailto:whitepack.lb@hotmail.com">whitepack.lb@hotmail.com</a></div>
+    <div><strong id="addrLabel">Address:</strong> <span id="companyAddress">(add in settings)</span></div>
+    <div class="top-actions">
+      <button id="langToggle" class="lang-btn">AR</button>
+      <span id="adminFlag">ADMIN</span>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div id="lastUpdated">Last updated: --</div>
+
+  <div id="adminControls">
+    <button class="btn primary" onclick="alert('Use admin.html to upload Excel and export products.json, then upload to GitHub.')">Admin info</button>
+  </div>
+
+  <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <input id="search" placeholder="Search products..." />
+    <select id="filterCat">
+      <option value="">All categories</option>
     </select>
-    <button id="langBtn" data-lang="en">AR</button>
-  </header>
+  </div>
 
-  <div id="products"></div>
-  <div id="empty" class="empty" style="display:none;">No products found.</div>
+  <div id="grid" class="grid" aria-live="polite"></div>
 
-  <script>
-    // CONFIG: your JSON source on GitHub Pages
-    const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
-    const RATE_KEY = "internal_catalogue_usd_to_lbp";
-    let products = [];
-    let currentLang = "en"; // en or ar
+  <div class="footer">
+    <div id="footerText"><strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a> • Email: <a href="mailto:whitepack.lb@hotmail.com">whitepack.lb@hotmail.com</a></div>
+  </div>
+</main>
 
-    // fetch data
-    async function loadData(){
-      try {
-        const res = await fetch(DATA_URL + "?t=" + Date.now()); // prevent cache
-        if(!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        products = Array.isArray(data) ? data : (data.products || []);
-        hideError();
-        buildCategoryFilter(products);
-        render(products);
-      } catch (err){
-        showError(currentLang === "ar" ? "تعذر تحميل البيانات من GitHub. تأكد من أن الملف products.json موجود." : "Could not load data from GitHub. Make sure products.json exists.");
-        document.getElementById("products").innerHTML = "";
-        document.getElementById("empty").style.display = "block";
-      }
-    }
+<div id="adminGear" title="Admin (press Alt+Shift+W)">⚙️</div>
 
-    function showError(msg){
-      const e = document.getElementById("error");
-      e.style.display = "block";
-      e.textContent = msg;
-    }
-    function hideError(){
-      const e = document.getElementById("error");
-      e.style.display = "none";
-    }
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="panel" id="modalPanel"></div>
+</div>
 
-    function buildCategoryFilter(list){
-      const catSel = document.getElementById("category");
-      const cats = Array.from(new Set(list.map(p => (currentLang === "ar" ? p.category_ar : p.category)).filter(Boolean))).sort();
-      catSel.innerHTML = `<option value="">${currentLang === "ar" ? "الكل" : "All"}</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join("");
-    }
+<script>
+// CONFIG
+const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
+const RATE_KEY = "internal_catalogue_usd_to_lbp";
+const ADMIN_PW = "whitepack123";
+let currentLang = "en";
+let products = [];
 
-    function getRate(){
-      const r = localStorage.getItem(RATE_KEY);
-      return r ? Number(r) : 90000;
-    }
+async function loadProducts(){
+  try{
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    const data = await res.json();
+    // assume it's an array
+    products = Array.isArray(data) ? data : (data.products || []);
+    setLastUpdated();
+    buildCategories();
+    render();
+  }catch(err){
+    document.getElementById("lastUpdated").textContent = currentLang==="ar"
+      ? "تعذر تحميل المنتجات من GitHub"
+      : "Could not load products from GitHub";
+  }
+}
 
-    function render(list){
-      const box = document.getElementById("products");
-      if(!list.length){
-        box.innerHTML = "";
-        document.getElementById("empty").style.display = "block";
-        return;
-      }
-      document.getElementById("empty").style.display = "none";
-      const rate = getRate();
-      box.innerHTML = list.map(p => {
-        const img = p.image ? `style="background-image:url('${p.image}');"` : "";
-        const wa = p.whatsapp ? `https://wa.me/${p.whatsapp}?text=${encodeURIComponent((currentLang==="ar"?"مرحبا، اريد هذا المنتج: ":"Hello, I want to order: ") + (p.name || p.sku))}` : "#";
-        const priceUSD = p.price ? Number(p.price) : null;
-        const priceLBP = priceUSD ? Math.round(priceUSD * rate).toLocaleString("en-LB") : null;
-        return `
-          <div class="card">
-            <div class="thumb" ${img}></div>
-            <div class="inner">
-              <div class="name ${currentLang==="ar"?"ar":""}">${currentLang==="ar" ? (p.name_ar || p.name || "(بدون اسم)") : (p.name || "(no name)")}</div>
-              <div class="desc ${currentLang==="ar"?"ar":""}">${currentLang==="ar" ? (p.description_ar || "") : (p.description || "")}</div>
-              <div class="price">
-                ${priceUSD ? priceUSD + " USD" : ""}
-                ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
-              </div>
-              <div class="qty" style="${currentLang==="ar" ? "direction:rtl" : ""}">
-                ${currentLang==="ar" ? "الكمية:" : "Qty:"} ${p.quantity || 0}
-              </div>
-              <div class="qty" style="font-size:.7rem; color:#94a3b8; ${currentLang==="ar" ? "direction:rtl" : ""}">
-                ${currentLang==="ar" ? "الصنف:" : "Cat:"} ${currentLang==="ar" ? (p.category_ar || "-") : (p.category || "-")}
-              </div>
-              <div class="actions">
-                <a class="btn" href="${wa}" target="_blank">${currentLang==="ar" ? "واتساب" : "WhatsApp"}</a>
-                <button class="btn outline" onclick='alert("${currentLang==="ar" ? "الرمز: " : "SKU: "}${p.sku || ""}")'>${currentLang==="ar" ? "الرمز" : "SKU"}</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
+function setLastUpdated(){
+  const now = new Date();
+  const formatted = now.getFullYear() + "-" +
+    String(now.getMonth()+1).padStart(2,"0") + "-" +
+    String(now.getDate()).padStart(2,"0") + " " +
+    String(now.getHours()).padStart(2,"0") + ":" +
+    String(now.getMinutes()).padStart(2,"0");
+  document.getElementById("lastUpdated").textContent =
+    (currentLang==="ar" ? "آخر تحديث: " : "Last updated: ") + formatted + " (GitHub)";
+}
 
-    function filter(){
-      const q = document.getElementById("search").value.toLowerCase().trim();
-      const cat = document.getElementById("category").value;
-      const filtered = products.filter(p => {
-        const name = (currentLang==="ar" ? p.name_ar : p.name) || "";
-        const category = (currentLang==="ar" ? p.category_ar : p.category) || "";
-        const inSearch = !q || name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)) || category.toLowerCase().includes(q);
-        const inCat = !cat || category === cat;
-        return inSearch && inCat;
-      });
-      render(filtered);
-    }
+function getRate(){
+  const r = localStorage.getItem(RATE_KEY);
+  return r ? Number(r) : 90000;
+}
 
-    document.getElementById("search").addEventListener("input", filter);
-    document.getElementById("category").addEventListener("change", filter);
+function buildCategories(){
+  const sel = document.getElementById("filterCat");
+  const cats = Array.from(new Set(products.map(p => currentLang==="ar" ? p.category_ar : p.category).filter(Boolean))).sort();
+  sel.innerHTML = `<option value="">${currentLang==="ar" ? "كل الاصناف" : "All categories"}</option>` + 
+    cats.map(c => `<option value="${c}">${c}</option>`).join("");
+}
 
-    document.getElementById("langBtn").addEventListener("click", () => {
-      currentLang = currentLang === "en" ? "ar" : "en";
-      const header = document.getElementById("topbar");
-      header.dir = currentLang === "ar" ? "rtl" : "ltr";
-      document.getElementById("langBtn").textContent = currentLang === "en" ? "AR" : "EN";
-      document.getElementById("title").textContent = currentLang === "en" ? "🍃 WhitePack Catalogue" : "🍃 كتالوج وايت باك";
-      document.getElementById("search").placeholder = currentLang === "en" ? "Search..." : "بحث...";
-      buildCategoryFilter(products);
-      filter();
-    });
+function render(){
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  const cat = document.getElementById("filterCat").value;
+  const rate = getRate();
 
-    loadData();
-  </script>
+  grid.innerHTML = "";
+
+  const filtered = products.filter(p => {
+    const name = (currentLang==="ar" ? p.name_ar : p.name) || "";
+    const category = (currentLang==="ar" ? p.category_ar : p.category) || "";
+    const inSearch = !q || name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q));
+    const inCat = !cat || category === cat;
+    return inSearch && inCat;
+  });
+
+  filtered.forEach(p => {
+    const priceUSD = p.price ? Number(p.price) : null;
+    const priceLBP = priceUSD ? Math.round(priceUSD * rate).toLocaleString("en-LB") : null;
+    const name = currentLang==="ar" ? (p.name_ar || p.name || "(بدون اسم)") : (p.name || "(no name)");
+    const desc = currentLang==="ar" ? (p.description_ar || "") : (p.description || "");
+    const catName = currentLang==="ar" ? (p.category_ar || "-") : (p.category || "-");
+    const wa = p.whatsapp ? `https://wa.me/${p.whatsapp}?text=${encodeURIComponent((currentLang==="ar"?"مرحبا، أريد: ":"Hello, I want: ") + name)}` : "#";
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-img">
+        <img src="${p.image || ''}" alt="${name}" onerror="this.style.display='none'">
+      </div>
+      <h3>${name}</h3>
+      <p>${desc}</p>
+      <div class="meta">
+        <div class="price">
+          ${priceUSD ? priceUSD + " USD" : ""}
+          ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
+        </div>
+        <button class="btn" onclick="window.open('${wa}', '_blank')">${currentLang==="ar" ? "واتساب" : "WhatsApp"}</button>
+      </div>
+      <div style="font-size:11px;color:#6b6b6b;margin-top:4px">${currentLang==="ar" ? "الصنف: " : "Category: "}${catName}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  if(!filtered.length){
+    const div = document.createElement("div");
+    div.textContent = currentLang==="ar" ? "لا يوجد منتجات" : "No products";
+    div.style.color = "#64748b";
+    grid.appendChild(div);
+  }
+}
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filterCat").addEventListener("change", render);
+
+document.getElementById("langToggle").addEventListener("click", () => {
+  currentLang = currentLang === "en" ? "ar" : "en";
+  applyLang();
+  buildCategories();
+  render();
+});
+
+function applyLang(){
+  const header = document.getElementById("topHeader");
+  if(currentLang === "ar"){
+    header.dir = "rtl";
+    document.getElementById("langToggle").textContent = "EN";
+    document.getElementById("search").placeholder = "بحث عن منتج...";
+    document.getElementById("waLabel").textContent = "واتساب:";
+    document.getElementById("emailLabel").textContent = "ايميل:";
+    document.getElementById("addrLabel").textContent = "العنوان:";
+    document.getElementById("companySlogan").textContent = "أفضل جودة";
+    document.getElementById("lastUpdated").textContent = "آخر تحديث: —";
+  } else {
+    header.dir = "ltr";
+    document.getElementById("langToggle").textContent = "AR";
+    document.getElementById("search").placeholder = "Search products...";
+    document.getElementById("waLabel").textContent = "WhatsApp:";
+    document.getElementById("emailLabel").textContent = "Email:";
+    document.getElementById("addrLabel").textContent = "Address:";
+    document.getElementById("companySlogan").textContent = "Best Quality";
+    document.getElementById("lastUpdated").textContent = "Last updated: —";
+  }
+  setLastUpdated();
+}
+
+// admin access (same password)
+const adminGear = document.getElementById("adminGear");
+const adminFlag = document.getElementById("adminFlag");
+adminGear.addEventListener("click", () => {
+  const pw = prompt(currentLang==="ar" ? "ادخل كلمة السر:" : "Enter admin password:");
+  if(pw === ADMIN_PW){
+    adminFlag.style.display = "inline-block";
+    document.getElementById("adminControls").style.display = "block";
+    alert(currentLang==="ar"
+      ? "تم تفعيل لوحة التحكم. لتحميل المنتجات استخدم admin.html و ارفع ملف products.json إلى GitHub."
+      : "Admin enabled. To update products use admin.html and upload products.json to GitHub.");
+  } else {
+    alert(currentLang==="ar" ? "كلمة السر غير صحيحة" : "Wrong password");
+  }
+});
+
+// initial
+applyLang();
+loadProducts();
+</script>
 </body>
 </html>
