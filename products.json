@@ -1,0 +1,28 @@
+[
+  {
+    "sku": "KRTF-01",
+    "name": "Interfold White",
+    "name_ar": "مناديل انترفولد بيضاء",
+    "category": "Paper & Tissue",
+    "category_ar": "مناديل وورقية",
+    "description": "High quality interfold tissue pack",
+    "description_ar": "علبة مناديل عالية الجودة",
+    "price": 2.5,
+    "quantity": 120,
+    "image": "",
+    "whatsapp": "9617000000"
+  },
+  {
+    "sku": "BAG-100",
+    "name": "Kraft Paper Bag",
+    "name_ar": "كيس كرافت",
+    "category": "Bags",
+    "category_ar": "أكياس",
+    "description": "Eco-friendly kraft bag",
+    "description_ar": "كيس كرافت بيئي",
+    "price": 1.2,
+    "quantity": 300,
+    "image": "",
+    "whatsapp": "9617000000"
+  }
+]
