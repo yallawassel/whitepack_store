@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WhitePack Admin (Products + Clients)</title>
+<title>WhitePack Admin (Products + Clients) v7.1</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
 body{font-family:Arial,sans-serif;background:#f5fff8;margin:0;padding:20px;color:#213;}
@@ -22,14 +22,14 @@ textarea{height:180px;}
 </head>
 <body>
 
-<h1>📦 WhitePack Admin (Single Catalogue)</h1>
+<h1>📦 WhitePack Admin (Single Catalogue) — v7.1</h1>
 
 <div class="card">
   <h3>1️⃣ Upload Excel (with 2 sheets)</h3>
   <input type="file" id="excelFile" accept=".xlsx,.xls" />
   <div class="note">
     Sheet <b>Products</b> → SKU, Name, Name_ar, Category, Category_ar, Description, Description_ar, Price, Quantity, Image, WhatsApp<br>
-    Sheet <b>Clients</b> → Name, Discount, WhatsApp
+    Sheet <b>Clients</b> → Name, Discount, WhatsApp (number or text, we will export as string)
   </div>
 </div>
 
@@ -52,7 +52,7 @@ textarea{height:180px;}
   <h3>3️⃣ Export</h3>
   <button onclick="exportProducts()">Export products.json</button>
   <button onclick="exportClients()">Export clients.json</button>
-  <div class="note">Upload both JSON files to GitHub → your single catalogue will use them.</div>
+  <div class="note">Upload both JSON files to GitHub → your catalogue (v7.1) will use them.</div>
 </div>
 
 <div class="card">
@@ -143,10 +143,13 @@ function exportClients(){
   const data = clientsSheet.map(row => {
     const keys = normalizeMap(row);
     const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+    // 🔒 always export whatsapp as string
+    let wa = row[keys["whatsapp"]] || "";
+    if (wa !== "") wa = String(wa);
     return {
       name: row[keys["name"]] || "",
       discount: num(row[keys["discount"]] || 0),
-      whatsapp: row[keys["whatsapp"]] || ""
+      whatsapp: wa
     };
   });
   downloadJSON(data, "clients.json");

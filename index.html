@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>WhitePack — Online Catalogue (v7 FINAL FIXED)</title>
+<title>WhitePack — Online Catalogue (v7.1 WhatsApp FIX)</title>
 <style>
 :root { --bg:#f5fff8; --accent:#3b7a3a; --accent2:#6ecf6e; --muted:#4b6b4b; --card:#fff; }
 *{box-sizing:border-box}
@@ -23,6 +23,7 @@ h1{margin:0;font-size:20px;color:#1f401d}
 .helper-text{font-size:11px;color:#475569;margin-top:-6px;display:block}
 #clientDiscountBadge{background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:9999px;font-size:12px;display:none}
 #clientNotFound{font-size:11.5px;color:#b91c1c;display:none}
+#clientWarning{font-size:11.5px;color:#b45309;display:none}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 #search{flex:1;padding:9px 10px;border:1px solid rgba(0,0,0,0.06);border-radius:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
@@ -68,6 +69,7 @@ h1{margin:0;font-size:20px;color:#1f401d}
       <label id="clientNameLabel" for="clientName">Client name</label>
       <input id="clientName" placeholder="Type your name or WhatsApp number..." />
       <span id="helperText" class="helper-text">You can enter name or WhatsApp number</span>
+      <span id="clientWarning">⚠️ Clients list not loaded. Discounts won’t work.</span>
     </div>
     <div id="clientDiscountBadge">Discount: 0%</div>
     <div id="clientNotFound">No discount for this client</div>
@@ -123,8 +125,20 @@ updateCartBadge();
 async function loadClients(){
   try{
     const res = await fetch(CLIENTS_URL + "?t=" + Date.now());
-    clients = await res.json();
-  }catch(e){ clients = []; }
+    const raw = await res.json();
+    // 🔒 force all whatsapps to string
+    clients = (raw || []).map(c => ({
+      name: c.name || "",
+      discount: Number(c.discount) || 0,
+      whatsapp: c.whatsapp != null ? String(c.whatsapp) : ""
+    }));
+    if (!clients.length){
+      document.getElementById("clientWarning").style.display = "inline-block";
+    }
+  }catch(e){
+    clients = [];
+    document.getElementById("clientWarning").style.display = "inline-block";
+  }
 }
 async function loadProducts(){
   try{
@@ -183,12 +197,19 @@ clientInput.addEventListener("change", ()=>{
   matchClient(clientInput.value.trim());
 });
 
-// ✅ FIXED normalizePhone
+// ✅ robust normalizePhone
 function normalizePhone(num){
-  let clean = (num || "").replace(/\D/g, "");  // digits only
-  if (clean.startsWith("961")) return clean;     // already full lebanese
-  if (clean.startsWith("0")) clean = clean.replace(/^0+/, ""); // remove leading zeros
-  if (clean.length <= 8) clean = "961" + clean;  // assume lebanon, add prefix
+  if (num == null) return "";
+  // force to string, remove spaces, dashes, plus
+  let clean = String(num).replace(/[^\d]/g, "");  // keep digits only
+  // if empty, return
+  if (!clean) return "";
+  // if already starts with 961 → OK
+  if (clean.startsWith("961")) return clean;
+  // remove leading zeros
+  clean = clean.replace(/^0+/, "");
+  // if still too short (<=8) assume Lebanon
+  if (clean.length <= 8) clean = "961" + clean;
   return clean;
 }
 
@@ -202,8 +223,10 @@ function matchClient(name){
   const cleanNum = normalizePhone(name);
 
   const found = clients.find(c => {
+    const cName = (c.name || "").toLowerCase();
     const cnum = normalizePhone(c.whatsapp || "");
-    return (c.name && c.name.toLowerCase().includes(cleanName)) ||
+    // match by name OR by number (contains either way)
+    return (cName && cName.includes(cleanName)) ||
            (cnum && (cnum.includes(cleanNum) || cleanNum.includes(cnum)));
   });
 
