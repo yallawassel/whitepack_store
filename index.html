@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>WhitePack — Online Catalogue (v6.2)</title>
+<title>WhitePack — Online Catalogue (v7 FINAL)</title>
 <style>
 :root { --bg:#f5fff8; --accent:#3b7a3a; --accent2:#6ecf6e; --muted:#4b6b4b; --card:#fff; }
 *{box-sizing:border-box}
@@ -104,35 +104,41 @@ h1{margin:0;font-size:20px;color:#1f401d}
 </div>
 
 <script>
+// ================== CONFIG ==================
 const CLIENTS_URL = "https://yallawassel.github.io/whitepack_store/clients.json";
 const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
-const CART_KEY = "whitepack_cart_v62";
-const RATE = 90000; // 1 USD = 90,000 LBP (can change later)
+const CART_KEY = "whitepack_cart_v7_final";
+const RATE = 90000; // you can change this later
 
+// ================== STATE ==================
 let clients = [];
 let products = [];
-let cart = [];
+let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 let currentLang = "en";
 let currentClient = { name: "", discount: 0, whatsapp: "" };
 
-// load saved cart
-cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 updateCartBadge();
 
-// LOAD DATA
-async function loadClients() {
-  try { const res = await fetch(CLIENTS_URL + "?t=" + Date.now()); clients = await res.json(); }
-  catch(e){ clients = []; }
+// ================== LOADERS ==================
+async function loadClients(){
+  try{
+    const res = await fetch(CLIENTS_URL + "?t=" + Date.now());
+    clients = await res.json();
+  }catch(e){ clients = []; }
 }
-async function loadProducts() {
-  try { const res = await fetch(DATA_URL + "?t=" + Date.now()); products = await res.json(); renderProducts(); }
-  catch(e){ products = []; }
+async function loadProducts(){
+  try{
+    const res = await fetch(DATA_URL + "?t=" + Date.now());
+    products = await res.json();
+    renderProducts();
+  }catch(e){ products = []; }
 }
+
 loadClients();
 loadProducts();
 
-// RENDER PRODUCTS
-function renderProducts() {
+// ================== RENDER PRODUCTS ==================
+function renderProducts(){
   const grid = document.getElementById("grid");
   const q = document.getElementById("search").value.toLowerCase().trim();
   grid.innerHTML = "";
@@ -140,13 +146,18 @@ function renderProducts() {
     .filter(p => !q || (p.name && p.name.toLowerCase().includes(q)) || (p.sku && p.sku.toLowerCase().includes(q)))
     .forEach((p, idx) => {
       const available = Number(p.quantity) > 0;
+      const nameToShow = currentLang==="ar" ? (p.name_ar || p.name || "") : (p.name || "");
+      const descToShow = currentLang==="ar" ? (p.description_ar || "") : (p.description || "");
       const div = document.createElement("div");
       div.className = "card";
       div.innerHTML = `
-        <div class="card-img"><img src="${p.image || ""}" alt="${p.name || ""}" onerror="this.style.display='none'"></div>
-        <h3>${currentLang==="ar" ? (p.name_ar || p.name || "") : (p.name || "")}</h3>
-        <p>${currentLang==="ar" ? (p.description_ar || "") : (p.description || "")}</p>
-        <div class="price">${p.price ? Number(p.price).toFixed(2) + " USD" : ""}<small>${p.price ? (Number(p.price) * RATE).toLocaleString("en-LB") + " LBP" : ""}</small></div>
+        <div class="card-img"><img src="${p.image || ""}" alt="${nameToShow}" onerror="this.style.display='none'"></div>
+        <h3>${nameToShow}</h3>
+        <p>${descToShow}</p>
+        <div class="price">
+          ${p.price ? Number(p.price).toFixed(2) + " USD" : ""}
+          <small>${p.price ? (Number(p.price)*RATE).toLocaleString("en-LB") + " LBP" : ""}</small>
+        </div>
         ${available ? "" : `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>`}
         <button class="cart-btn" style="margin-top:auto;${!available ? "opacity:.5;pointer-events:none" : ""}" onclick="addToCart(${idx})">
           ${currentLang==="ar" ? "أضف إلى السلة" : "Add to Cart"}
@@ -154,43 +165,54 @@ function renderProducts() {
       `;
       grid.appendChild(div);
     });
-  if(!grid.innerHTML){
+  if (!grid.innerHTML){
     grid.innerHTML = `<div style="color:#64748b">${currentLang==="ar" ? "لا يوجد منتجات" : "No products"}</div>`;
   }
 }
 
-// SEARCH
+// ================== SEARCH INPUT ==================
 document.getElementById("search").addEventListener("input", renderProducts);
 
-// CLIENT HANDLING
+// ================== CLIENT HANDLING ==================
 const clientInput = document.getElementById("clientName");
 const helper = document.getElementById("helperText");
 
-clientInput.addEventListener("input", () => {
+clientInput.addEventListener("input", ()=>{
   helper.style.display = clientInput.value.trim() ? "none" : "block";
 });
 
-clientInput.addEventListener("change", () => {
+clientInput.addEventListener("change", ()=>{
   matchClient(clientInput.value.trim());
 });
 
-function normalizePhone(num){return(num||"").replace(/\D/g,"").replace(/^0+/,"").replace(/^961/,"");}
+// ✅ FIXED NORMALIZATION — supports +961, 961, 0, OR partial numbers
+function normalizePhone(num){
+  let clean = (num || "").replace(/\D/g, "");  // keep digits
+  // if full 961xxxxxx keep as is
+  if (clean.startsWith("961")) return clean;
+  // remove leading zeros
+  if (clean.startsWith("0")) clean = clean.replace(/^0+/, "");
+  // if user typed only 7-8 digits, assume Lebanese and prefix 961
+  if (clean.length <= 8) clean = "961" + clean;
+  return clean;
+}
 
 function matchClient(name){
-  if(!name){
-    currentClient = { name:"", discount:0, whatsapp:"" };
-    document.getElementById("clientDiscountBadge").style.display="none";
-    document.getElementById("clientNotFound").style.display="none";
+  if (!name){
+    resetClient();
     renderCart();
     return;
   }
   const clean = name.toLowerCase();
   const cleanNum = normalizePhone(name);
-  const found = clients.find(c =>
-    (c.name && c.name.toLowerCase() === clean) ||
-    (c.whatsapp && normalizePhone(c.whatsapp).includes(cleanNum))
-  );
-  if(found){
+
+  const found = clients.find(c => {
+    const cnum = normalizePhone(c.whatsapp);
+    return (c.name && c.name.toLowerCase() === clean) ||
+           (cnum && (cnum.includes(cleanNum) || cleanNum.includes(cnum)));
+  });
+
+  if (found){
     currentClient = {
       name: found.name,
       discount: Number(found.discount) || 0,
@@ -208,25 +230,37 @@ function matchClient(name){
   renderCart();
 }
 
-// CART
+function resetClient(){
+  currentClient = { name:"", discount:0, whatsapp:"" };
+  document.getElementById("clientDiscountBadge").style.display="none";
+  document.getElementById("clientNotFound").style.display="none";
+}
+
+// ================== CART LOGIC ==================
+const cartModal = document.getElementById("cartModal");
+document.getElementById("cartToggle").addEventListener("click", openCart);
+
+function openCart(){ cartModal.style.display="flex"; renderCart(); }
+function closeCart(){ cartModal.style.display="none"; }
+
 function addToCart(idx){
   const p = products[idx];
-  const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
-  const inCart = cart.find(item => item.id === uniqueId);
   const stock = Number(p.quantity) || 0;
-  if(inCart){
-    if(inCart.qty + 1 > stock){
+  const id = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
+  const found = cart.find(i => i.id === id);
+  if (found){
+    if (found.qty + 1 > stock && stock !== 0){
       alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
       return;
     }
-    inCart.qty += 1;
+    found.qty += 1;
   } else {
-    if(stock <= 0){
+    if (stock <= 0){
       alert(currentLang==="ar" ? "غير متوفر" : "Out of stock");
       return;
     }
     cart.push({
-      id: uniqueId,
+      id,
       sku: p.sku || "",
       name: p.name || "",
       name_ar: p.name_ar || "",
@@ -245,23 +279,19 @@ function saveCart(){
 }
 
 function updateCartBadge(){
-  const count = cart.reduce((s,i)=>s+i.qty, 0);
+  const count = cart.reduce((s,i)=>s+i.qty,0);
   document.getElementById("cartCount").textContent = count;
 }
 
-const cartModal = document.getElementById("cartModal");
-document.getElementById("cartToggle").addEventListener("click", openCart);
-function openCart(){ cartModal.style.display="flex"; renderCart(); }
-function closeCart(){ cartModal.style.display="none"; }
-
 function changeCartQty(idx, delta){
   const item = cart[idx];
-  if(!item) return;
-  const p = products.find(x => x.sku === item.sku) || products.find(x => x.name === item.name);
-  const stock = p ? (Number(p.quantity) || 0) : 999999;
+  if (!item) return;
+  const p = products.find(x => (x.sku && x.sku === item.sku) || x.name === item.name);
+  const stock = p ? (Number(p.quantity) || 0) : 99999;
   const newQty = item.qty + delta;
-  if(newQty < 1){ cart.splice(idx,1); }
-  else if(newQty > stock){
+  if (newQty < 1){
+    cart.splice(idx,1);
+  } else if (newQty > stock && stock !== 0){
     alert(currentLang==="ar" ? "الكمية أكبر من المخزون" : "Quantity exceeds stock");
     return;
   } else {
@@ -291,6 +321,7 @@ function renderCart(){
   const info = document.getElementById("cartClientInfo");
   box.innerHTML = "";
   let subtotal = 0;
+
   cart.forEach((item, idx) => {
     const line = item.price * item.qty;
     subtotal += line;
@@ -314,19 +345,20 @@ function renderCart(){
     box.appendChild(div);
   });
 
-  // client info
+  // client info in cart
   if (currentClient.name){
-    info.style.display = "block";
+    info.style.display="block";
     info.textContent = (currentLang==="ar" ? "العميل: " : "Client: ") + currentClient.name +
       (currentClient.discount ? " — " + (currentLang==="ar" ? "خصم" : "Discount") + " " + currentClient.discount + "%" : "");
   } else {
-    info.style.display = "none";
+    info.style.display="none";
   }
 
   const discountPct = currentClient.discount || 0;
   let discountAmount = 0;
   let total = subtotal;
-  if(discountPct){
+
+  if (discountPct){
     discountAmount = subtotal * (discountPct/100);
     total = subtotal - discountAmount;
     document.getElementById("cartDiscount").style.display="block";
@@ -344,9 +376,8 @@ function renderCart(){
     Math.round(total * RATE).toLocaleString("en-LB") + " LBP";
 }
 
-// CHECKOUT
 function checkoutCart(){
-  if(!cart.length){
+  if (!cart.length){
     alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
     return;
   }
@@ -354,19 +385,20 @@ function checkoutCart(){
   let subtotal = 0;
   let msg = "";
   msg += (currentLang==="ar" ? "العميل: " : "Client: ") + (currentClient.name || (currentLang==="ar" ? "غير معروف" : "Unknown")) + "\n";
-  if(discountPct){ msg += (currentLang==="ar" ? "الخصم: " : "Discount: ") + discountPct + "%\n\n"; } else { msg += "\n"; }
-  msg += (currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n");
-
+  if (discountPct){
+    msg += (currentLang==="ar" ? "الخصم: " : "Discount: ") + discountPct + "%\n\n";
+  } else {
+    msg += "\n";
+  }
+  msg += (currentLang==="ar" ? "مرحبا، أريد الطلب:\n" : "Hello, I would like to order:\n");
   cart.forEach(item => {
     const line = item.price * item.qty;
     subtotal += line;
     msg += `- ${(currentLang==="ar" ? (item.name_ar || item.name) : (item.name || item.name_ar))} × ${item.qty} = ${line.toFixed(2)} USD\n`;
   });
-
   let total = subtotal;
-  let discountAmount = 0;
-  if(discountPct){
-    discountAmount = subtotal * (discountPct/100);
+  if (discountPct){
+    const discountAmount = subtotal * (discountPct/100);
     total = subtotal - discountAmount;
     msg += (currentLang==="ar"
       ? `المجموع قبل الخصم: ${subtotal.toFixed(2)} USD\n`
@@ -382,12 +414,11 @@ function checkoutCart(){
   const waUrl = `https://wa.me/96181085811?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, "_blank");
 
-  // keep cart or clear?
   clearCart();
 }
 
-// LANG TOGGLE
-document.getElementById("langToggle").addEventListener("click", () => {
+// ================== LANG TOGGLE ==================
+document.getElementById("langToggle").addEventListener("click", ()=>{
   currentLang = currentLang === "en" ? "ar" : "en";
   applyLang();
   renderProducts();
@@ -395,7 +426,7 @@ document.getElementById("langToggle").addEventListener("click", () => {
 });
 
 function applyLang(){
-  if(currentLang === "ar"){
+  if (currentLang === "ar"){
     document.body.dir = "rtl";
     document.getElementById("langToggle").textContent = "EN";
     document.getElementById("clientNameLabel").textContent = "اسم العميل";
@@ -420,7 +451,7 @@ function applyLang(){
   }
 }
 
-// init lang texts
+// init
 applyLang();
 </script>
 </body>
