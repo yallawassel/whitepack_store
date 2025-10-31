@@ -3,102 +3,409 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>WhitePack — Online Catalogue (v7.1 WhatsApp FIX)</title>
+<title>WhitePack — Online Catalogue</title>
 <style>
-:root { --bg:#f5fff8; --accent:#3b7a3a; --accent2:#6ecf6e; --muted:#4b6b4b; --card:#fff; }
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial;background:var(--bg);color:#213;line-height:1.35}
-header{background:linear-gradient(90deg,#a6e8a6,#4ea84e);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{width:56px;height:44px;border-radius:8px;background:#3b7a3a;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px}
-h1{margin:0;font-size:20px;color:#1f401d}
-.topbar{margin-left:auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end;font-size:13px;color:#133a12}
-.topbar a{color:#133a12;text-decoration:none;font-weight:600}
-.top-actions{display:flex;gap:6px;align-items:center}
-.lang-btn,.cart-btn{border:none;background:#fff;color:#166534;border-radius:9999px;padding:3px 12px;font-size:12px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px}
-.cart-badge{background:#166534;color:#fff;border-radius:9999px;min-width:18px;text-align:center;font-size:11px;padding:0 4px}
-.container{padding:16px}
-.client-box{background:#fff;border:1px solid rgba(0,0,0,0.04);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.client-box label{font-size:12.5px}
-.client-box input{border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;font-size:13px}
-.helper-text{font-size:11px;color:#475569;margin-top:-6px;display:block}
-#clientDiscountBadge{background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:9999px;font-size:12px;display:none}
-#clientNotFound{font-size:11.5px;color:#b91c1c;display:none}
-#clientWarning{font-size:11.5px;color:#b45309;display:none}
-.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-#search{flex:1;padding:9px 10px;border:1px solid rgba(0,0,0,0.06);border-radius:10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
-.card{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,0.06);display:flex;flex-direction:column;gap:6px;min-height:270px;overflow:hidden}
-.card-img{width:100%;aspect-ratio:1/1;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.card-img img{width:100%;height:100%;object-fit:cover}
-.card h3{margin:0;font-size:15px;color:#2f5f2d}
-.card p{margin:0;color:#4f6a4b;font-size:12.5px;min-height:34px}
-.price{font-weight:700;color:#2f5f2d;font-size:.85rem;margin-top:4px}
-.price small{display:block;color:#557;font-weight:400;font-size:.65rem}
-.out-stock{color:#b91c1c;font-size:12px;font-weight:600;margin-top:4px}
-.footer{background:#d8f0d8;padding:12px;text-align:center;font-size:14px;color:#1e3a1e;margin-top:18px;border-top:1px solid rgba(0,0,0,0.03)}
-/* cart modal */
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);z-index:1000}
-.modal .panel{width:96%;max-width:540px;background:#fff;border-radius:12px;padding:14px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 25px rgba(0,0,0,.22)}
-.cart-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;margin-bottom:6px}
-.qty-edit{display:flex;gap:3px;align-items:center}
-.qty-edit button{width:22px;height:22px;border:none;background:#e2e8f0;border-radius:4px;cursor:pointer}
-.close-btn{border:none;background:#e2e8f0;border-radius:6px;padding:3px 8px;cursor:pointer}
-.checkout-btn{border:none;background:#166534;color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer}
-@media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}header{flex-wrap:wrap}.client-box{flex-direction:column;align-items:flex-start}}
+:root {
+  --bg: #f5fff8;
+  --accent: #3b7a3a;
+  --accent2: #6ecf6e;
+  --muted: #4b6b4b;
+  --card: #fff;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+  background: var(--bg);
+  color: #213;
+  line-height: 1.35;
+}
+header {
+  background: linear-gradient(90deg, #a6e8a6, #4ea84e);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo {
+  width: 56px;
+  height: 44px;
+  border-radius: 8px;
+  background: #3b7a3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+h1 { margin: 0; font-size: 20px; color: #1f401d; }
+.topbar {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  font-size: 13px;
+  color: #133a12;
+}
+.topbar a { color: #133a12; text-decoration: none; font-weight: 600; }
+.top-actions { display:flex; gap:6px; align-items:center; }
+
+.lang-btn {
+  border:none;
+  background:#fff;
+  color:#166534;
+  border-radius:9999px;
+  padding:2px 10px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+.cart-btn {
+  border:none;
+  background:#ffffff;
+  color:#166534;
+  border-radius:9999px;
+  padding:3px 12px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.cart-badge {
+  background:#166534;
+  color:#fff;
+  border-radius:9999px;
+  min-width:18px;
+  text-align:center;
+  font-size:11px;
+  padding:0 4px;
+}
+
+.container { padding: 16px; }
+#lastUpdated {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+/* client box */
+.client-box {
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.04);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:10px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.client-box label { font-size:12.5px; }
+.client-box input {
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+  padding:4px 8px;
+  font-size:13px;
+}
+#clientDiscountBadge {
+  background:#d1fae5;
+  color:#065f46;
+  padding:3px 8px;
+  border-radius:9999px;
+  font-size:12px;
+  display:none;
+}
+#clientNotFound {
+  font-size:11.5px;
+  color:#b91c1c;
+  display:none;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+#search {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: .9rem;
+}
+#filterCat {
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: .85rem;
+  background:#fff;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 270px;
+  overflow: hidden;
+}
+.card-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card-img img {
+  width:100%;
+  height:100%;
+  object-fit: cover;
+}
+.card h3 { margin: 0; font-size: 15px; color: #2f5f2d; }
+.card p { margin: 0; color: #4f6a4b; font-size: 12.5px; min-height:34px; }
+.price {
+  font-weight:700;
+  color:#2f5f2d;
+  font-size:.85rem;
+  margin-top:4px;
+}
+.price small {
+  display:block;
+  color:#557;
+  font-weight:400;
+  font-size:.65rem;
+}
+.qty-row {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-top:6px;
+}
+.qty-box {
+  display:flex;
+  gap:3px;
+  align-items:center;
+}
+.qty-box button {
+  width:24px; height:26px;
+  border:none;
+  background:#e2e8f0;
+  border-radius:6px;
+  cursor:pointer;
+}
+.qty-box input {
+  width:40px;
+  text-align:center;
+  border:1px solid #e2e8f0;
+  border-radius:6px;
+  height:26px;
+}
+.add-btn {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border:none;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
+  cursor:pointer;
+  flex:1;
+}
+.add-btn.disabled {
+  background:#e2e8f0;
+  color:#94a3b8;
+  cursor:not-allowed;
+}
+.out-stock {
+  color:#b91c1c;
+  font-size:12px;
+  font-weight:600;
+  margin-top:4px;
+}
+.footer {
+  background: #d8f0d8;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: #1e3a1e;
+  margin-top: 18px;
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
+#adminFlag {
+  display:none;
+  font-size:13px;
+  padding:4px 6px;
+  border-radius:8px;
+  background:#e8ffe8;
+  color:#133a12;
+  border:1px solid rgba(0,0,0,0.04)
+}
+
+/* admin gear */
+#adminGear {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffffaa;
+  border: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.12;
+  transition: opacity .18s, transform .12s;
+  z-index: 9999;
+}
+#adminGear:hover { opacity: 1; transform: scale(1.05); }
+#adminControls { display:none; margin-bottom:12px; }
+
+/* modal (cart) */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2,6,23,0.45);
+  z-index: 10000;
+}
+.modal .panel {
+  width: 96%;
+  max-width: 540px;
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y:auto;
+}
+.cart-item {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  margin-bottom:6px;
+  border-bottom:1px solid #e2e8f0;
+  padding-bottom:4px;
+}
+.cart-item-title {
+  font-size:13px;
+  font-weight:600;
+}
+.cart-item-qty {
+  font-size:12px;
+  color:#475569;
+}
+.cart-totals {
+  margin-top:10px;
+  border-top:1px solid #e2e8f0;
+  padding-top:10px;
+}
+.close-btn {
+  border:none;
+  background:#e2e8f0;
+  padding:4px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.checkout-btn {
+  background:#166534;
+  color:#fff;
+  border:none;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+@media(max-width:600px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  header{flex-wrap:wrap}
+  .topbar{align-items:flex-start}
+  .client-box{flex-direction:column;align-items:flex-start}
+}
 </style>
 </head>
 <body>
-<header>
+<header id="topHeader" dir="ltr">
   <div class="logo">WP</div>
   <div>
-    <h1>White Pack</h1>
-    <div style="font-size:12px;color:#2b5a2b">Best Quality</div>
+    <h1 id="companyName">White Pack</h1>
+    <div id="companySlogan" style="font-size:12px;color:#2b5a2b">Best Quality</div>
   </div>
   <div class="topbar">
-    <div><strong>WhatsApp:</strong> <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
+    <div><strong id="waLabel">WhatsApp:</strong> <a id="waLink" href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
     <div class="top-actions">
       <button id="langToggle" class="lang-btn">AR</button>
       <button id="cartToggle" class="cart-btn">🛒 <span id="cartCount" class="cart-badge">0</span></button>
+      <span id="adminFlag">ADMIN</span>
     </div>
   </div>
 </header>
 
 <main class="container">
+  <div id="lastUpdated">Last updated: --</div>
+
+  <!-- CLIENT SECTION -->
   <div class="client-box">
     <div style="flex:1">
       <label id="clientNameLabel" for="clientName">Client name</label>
-      <input id="clientName" placeholder="Type your name or WhatsApp number..." />
-      <span id="helperText" class="helper-text">You can enter name or WhatsApp number</span>
-      <span id="clientWarning">⚠️ Clients list not loaded. Discounts won’t work.</span>
+      <input id="clientName" placeholder="Type your name..." />
     </div>
     <div id="clientDiscountBadge">Discount: 0%</div>
     <div id="clientNotFound">No discount for this client</div>
   </div>
 
+  <div id="adminControls">
+    <button class="add-btn" onclick="alert('Use admin.html to upload Excel and export products.json and clients.json, then upload both to GitHub.')">Admin info</button>
+  </div>
   <div class="controls">
     <input id="search" placeholder="Search products..." />
+    <select id="filterCat">
+      <option value="">All categories</option>
+    </select>
   </div>
-
   <div id="grid" class="grid"></div>
-  <div class="footer"><strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
+  <div class="footer" id="footerText">
+    <strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a>
+  </div>
 </main>
 
+<div id="adminGear" title="Admin (press Alt+Shift+W)">⚙️</div>
+
 <!-- CART MODAL -->
-<div id="cartModal" class="modal">
+<div id="cartModal" class="modal" aria-modal="true" role="dialog">
   <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <h2 id="cartTitle" style="margin:0;font-size:15px">Cart</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 id="cartTitle" style="margin:0;font-size:16px;">Cart</h2>
       <button onclick="closeCart()" class="close-btn" id="closeCartBtn">X</button>
     </div>
     <div id="cartClientInfo" style="font-size:12px;color:#475569;margin-bottom:6px;display:none"></div>
     <div id="cartItems"></div>
-    <div style="border-top:1px solid #e2e8f0;margin-top:6px;padding-top:6px">
+    <div class="cart-totals">
       <div id="cartSubtotal">Subtotal: 0 USD</div>
-      <div id="cartDiscount" style="color:#b91c1c;font-size:12px;display:none"></div>
-      <div id="cartTotalUSD" style="font-weight:600;margin-top:4px">Total: 0 USD</div>
+      <div id="cartDiscount" style="font-size:12px;color:#b91c1c;display:none"></div>
+      <div id="cartTotalUSD" style="font-weight:600;margin-top:3px;">Total: 0 USD</div>
       <div id="cartTotalLBP" style="font-size:12px;color:#475569">0 LBP</div>
     </div>
-    <div style="display:flex;gap:8px;justify-content:space-between;margin-top:10px">
+    <div style="display:flex;justify-content:space-between;margin-top:10px;gap:10px">
       <button onclick="clearCart()" class="close-btn" id="clearCartBtn">Clear</button>
       <button onclick="checkoutCart()" class="checkout-btn" id="checkoutBtn">Send to WhatsApp</button>
     </div>
@@ -106,218 +413,259 @@ h1{margin:0;font-size:20px;color:#1f401d}
 </div>
 
 <script>
-// ====== CONFIG ======
-const CLIENTS_URL = "https://yallawassel.github.io/whitepack_store/clients.json";
+// CONFIG
 const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
-const CART_KEY = "whitepack_cart_v7_fixed";
-const RATE = 90000; // 1 USD = 90,000 LBP
-
-// ====== STATE ======
-let clients = [];
-let products = [];
-let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+const CLIENTS_URL = "https://yallawassel.github.io/whitepack_store/clients.json";
+const RATE_KEY = "internal_catalogue_usd_to_lbp";
+const ADMIN_PW = "whitepack123";
+const CART_KEY = "whitepack_cart_v1";
+const WA_KEY = "whitepack_whatsapp_number";
+const CLIENT_NAME_KEY = "whitepack_client_name";
 let currentLang = "en";
+let products = [];
+let clients = [];
+let cart = loadCart();
 let currentClient = { name: "", discount: 0, whatsapp: "" };
 
-updateCartBadge();
-
-// ====== LOADERS ======
-async function loadClients(){
-  try{
-    const res = await fetch(CLIENTS_URL + "?t=" + Date.now());
-    const raw = await res.json();
-    // 🔒 force all whatsapps to string
-    clients = (raw || []).map(c => ({
-      name: c.name || "",
-      discount: Number(c.discount) || 0,
-      whatsapp: c.whatsapp != null ? String(c.whatsapp) : ""
-    }));
-    if (!clients.length){
-      document.getElementById("clientWarning").style.display = "inline-block";
-    }
-  }catch(e){
-    clients = [];
-    document.getElementById("clientWarning").style.display = "inline-block";
-  }
-}
+// load products + clients
 async function loadProducts(){
   try{
     const res = await fetch(DATA_URL + "?t=" + Date.now());
-    products = await res.json();
-    renderProducts();
-  }catch(e){ products = []; }
+    const data = await res.json();
+    products = Array.isArray(data) ? data : (data.products || []);
+    setLastUpdated();
+    buildCategories();
+    render();
+  }catch(err){
+    document.getElementById("lastUpdated").textContent = currentLang==="ar"
+      ? "تعذر تحميل المنتجات من GitHub"
+      : "Could not load products from GitHub";
+  }
 }
-loadClients();
-loadProducts();
+async function loadClients(){
+  try{
+    const res = await fetch(CLIENTS_URL + "?t=" + Date.now());
+    const data = await res.json();
+    clients = Array.isArray(data) ? data : (data.clients || []);
+    // try to auto-match saved client
+    const savedName = localStorage.getItem(CLIENT_NAME_KEY);
+    if(savedName){
+      document.getElementById("clientName").value = savedName;
+      matchClient(savedName);
+    }
+  }catch(err){
+    // clients optional
+  }
+}
 
-// ====== RENDER PRODUCTS ======
-function renderProducts(){
+function setLastUpdated(){
+  const now = new Date();
+  const formatted = now.toISOString().slice(0,16).replace("T"," ");
+  document.getElementById("lastUpdated").textContent =
+    (currentLang==="ar" ? "آخر تحديث: " : "Last updated: ") + formatted + " (GitHub)";
+}
+
+function getRate(){
+  const r = localStorage.getItem(RATE_KEY);
+  return r ? Number(r) : 90000;
+}
+
+function buildCategories(){
+  const sel = document.getElementById("filterCat");
+  const cats = Array.from(new Set(products.map(p => currentLang==="ar" ? p.category_ar : p.category).filter(Boolean))).sort();
+  sel.innerHTML = `<option value="">${currentLang==="ar" ? "كل الاصناف" : "All categories"}</option>` +
+    cats.map(c => `<option value="${c}">${c}</option>`).join("");
+}
+
+function render(){
   const grid = document.getElementById("grid");
   const q = document.getElementById("search").value.toLowerCase().trim();
+  const cat = document.getElementById("filterCat").value;
+  const rate = getRate();
+
   grid.innerHTML = "";
-  products
-    .filter(p => !q || (p.name && p.name.toLowerCase().includes(q)) || (p.sku && p.sku.toLowerCase().includes(q)))
-    .forEach((p, idx) => {
-      const available = Number(p.quantity) > 0;
-      const nameToShow = currentLang==="ar" ? (p.name_ar || p.name || "") : (p.name || "");
-      const descToShow = currentLang==="ar" ? (p.description_ar || "") : (p.description || "");
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <div class="card-img"><img src="${p.image || ""}" alt="${nameToShow}" onerror="this.style.display='none'"></div>
-        <h3>${nameToShow}</h3>
-        <p>${descToShow}</p>
-        <div class="price">
-          ${p.price ? Number(p.price).toFixed(2) + " USD" : ""}
-          <small>${p.price ? (Number(p.price)*RATE).toLocaleString("en-LB") + " LBP" : ""}</small>
-        </div>
-        ${available ? "" : `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>`}
-        <button class="cart-btn" style="margin-top:auto;${!available ? "opacity:.5;pointer-events:none" : ""}" onclick="addToCart(${idx})">
-          ${currentLang==="ar" ? "أضف إلى السلة" : "Add to Cart"}
-        </button>
-      `;
-      grid.appendChild(div);
-    });
-  if (!grid.innerHTML){
-    grid.innerHTML = `<div style="color:#64748b">${currentLang==="ar" ? "لا يوجد منتجات" : "No products"}</div>`;
-  }
-}
 
-// search input
-document.getElementById("search").addEventListener("input", renderProducts);
-
-// ====== CLIENT HANDLING ======
-const clientInput = document.getElementById("clientName");
-const helper = document.getElementById("helperText");
-
-clientInput.addEventListener("input", ()=>{
-  helper.style.display = clientInput.value.trim() ? "none" : "block";
-});
-clientInput.addEventListener("change", ()=>{
-  matchClient(clientInput.value.trim());
-});
-
-// ✅ robust normalizePhone
-function normalizePhone(num){
-  if (num == null) return "";
-  // force to string, remove spaces, dashes, plus
-  let clean = String(num).replace(/[^\d]/g, "");  // keep digits only
-  // if empty, return
-  if (!clean) return "";
-  // if already starts with 961 → OK
-  if (clean.startsWith("961")) return clean;
-  // remove leading zeros
-  clean = clean.replace(/^0+/, "");
-  // if still too short (<=8) assume Lebanon
-  if (clean.length <= 8) clean = "961" + clean;
-  return clean;
-}
-
-function matchClient(name){
-  if (!name){
-    resetClient();
-    renderCart();
-    return;
-  }
-  const cleanName = name.toLowerCase().trim();
-  const cleanNum = normalizePhone(name);
-
-  const found = clients.find(c => {
-    const cName = (c.name || "").toLowerCase();
-    const cnum = normalizePhone(c.whatsapp || "");
-    // match by name OR by number (contains either way)
-    return (cName && cName.includes(cleanName)) ||
-           (cnum && (cnum.includes(cleanNum) || cleanNum.includes(cnum)));
+  const filtered = products.filter((p,idx) => {
+    const name = (currentLang==="ar" ? p.name_ar : p.name) || "";
+    const category = (currentLang==="ar" ? p.category_ar : p.category) || "";
+    const inSearch = !q || name.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q));
+    const inCat = !cat || category === cat;
+    return inSearch && inCat;
   });
 
-  if (found){
-    currentClient = {
-      name: found.name,
-      discount: Number(found.discount) || 0,
-      whatsapp: found.whatsapp || ""
-    };
-    document.getElementById("clientDiscountBadge").style.display="inline-block";
-    document.getElementById("clientDiscountBadge").textContent =
-      (currentLang==="ar" ? "خصم: " : "Discount: ") + currentClient.discount + "%";
-    document.getElementById("clientNotFound").style.display="none";
-  } else {
-    currentClient = { name, discount: 0, whatsapp: "" };
-    document.getElementById("clientDiscountBadge").style.display="none";
-    document.getElementById("clientNotFound").style.display="inline-block";
+  filtered.forEach((p, idx) => {
+    const priceUSD = p.price ? Number(p.price) : null;
+    const priceLBP = priceUSD ? Math.round(priceUSD * rate).toLocaleString("en-LB") : null;
+    const name = currentLang==="ar" ? (p.name_ar || p.name || "(بدون اسم)") : (p.name || "(no name)");
+    const desc = currentLang==="ar" ? (p.description_ar || "") : (p.description || "");
+    const catName = currentLang==="ar" ? (p.category_ar || "-") : (p.category || "-");
+    const inStock = !p.quantity ? false : Number(p.quantity) > 0;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-img">
+        <img src="${p.image || ''}" alt="${name}" onerror="this.style.display='none'">
+      </div>
+      <h3>${name}</h3>
+      <p>${desc}</p>
+      <div class="price">
+        ${priceUSD ? priceUSD + " USD" : ""}
+        ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
+      </div>
+      ${!inStock ? `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>` : ""}
+      <div class="qty-row">
+        <div class="qty-box">
+          <button onclick="changeQty(${idx}, -1)">-</button>
+          <input id="qty-${idx}" type="number" min="1" value="1" />
+          <button onclick="changeQty(${idx}, 1)">+</button>
+        </div>
+        <button class="add-btn ${!inStock ? "disabled":""}" onclick="addToCart(${idx})" ${!inStock ? "disabled" : ""}>
+          ${currentLang==="ar" ? "إضافة" : "Add to Cart"}
+        </button>
+      </div>
+      <div style="font-size:11px;color:#6b6b6b;margin-top:4px">
+        ${currentLang==="ar" ? "الصنف: " : "Category: "}${catName}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  if(!filtered.length){
+    const div = document.createElement("div");
+    div.textContent = currentLang==="ar" ? "لا يوجد منتجات" : "No products";
+    div.style.color = "#64748b";
+    grid.appendChild(div);
   }
-  renderCart();
 }
 
-function resetClient(){
-  currentClient = { name:"", discount:0, whatsapp:"" };
-  document.getElementById("clientDiscountBadge").style.display="none";
-  document.getElementById("clientNotFound").style.display="none";
+function changeQty(idx, delta){
+  const inp = document.getElementById("qty-" + idx);
+  if(!inp) return;
+  let v = Number(inp.value) || 1;
+  v += delta;
+  if(v < 1) v = 1;
+  inp.value = v;
 }
-
-// ====== CART ======
-const cartModal = document.getElementById("cartModal");
-document.getElementById("cartToggle").addEventListener("click", openCart);
-
-function openCart(){ cartModal.style.display="flex"; renderCart(); }
-function closeCart(){ cartModal.style.display="none"; }
 
 function addToCart(idx){
   const p = products[idx];
-  const stock = Number(p.quantity) || 0;
-  const id = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
-  const found = cart.find(i => i.id === id);
-  if (found){
-    if (stock && found.qty + 1 > stock){
-      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المخزون" : "Cannot add more than in stock");
+  const qtyInput = document.getElementById("qty-" + idx);
+  const qty = Number(qtyInput.value) || 1;
+  const currentStock = Number(p.quantity) || 0;
+  if(currentStock <= 0){
+    alert(currentLang==="ar" ? "هذا المنتج غير متوفر" : "This product is out of stock");
+    return;
+  }
+  if(qty > currentStock){
+    alert(currentLang==="ar" ? "الكمية المطلوبة أكبر من المخزون" : "Requested quantity exceeds stock");
+    return;
+  }
+
+  // make unique id (fix for products without sku)
+  const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
+
+  const existing = cart.find(item => item.id === uniqueId);
+  if(existing){
+    if(existing.qty + qty > currentStock){
+      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
       return;
     }
-    found.qty += 1;
+    existing.qty += qty;
   } else {
-    if (stock === 0){
-      alert(currentLang==="ar" ? "غير متوفر" : "Out of stock");
-      return;
-    }
     cart.push({
-      id,
-      sku: p.sku || "",
-      name: p.name || "",
-      name_ar: p.name_ar || "",
-      price: Number(p.price) || 0,
-      qty: 1
+      id: uniqueId,
+      sku: p.sku,
+      name: p.name,
+      name_ar: p.name_ar,
+      price: p.price,
+      qty: qty
     });
   }
   saveCart();
   updateCartBadge();
-  renderCart();
-  openCart();
+  alert(currentLang==="ar" ? "تمت الإضافة إلى السلة" : "Added to cart");
 }
 
+function loadCart(){
+  const raw = localStorage.getItem(CART_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
 function saveCart(){
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
-
 function updateCartBadge(){
-  const count = cart.reduce((s,i)=>s+i.qty, 0);
-  document.getElementById("cartCount").textContent = count;
+  document.getElementById("cartCount").textContent = cart.reduce((s,i)=>s+i.qty, 0);
 }
 
-function changeCartQty(idx, delta){
-  const item = cart[idx];
-  if (!item) return;
-  const p = products.find(x => (x.sku && x.sku === item.sku) || x.name === item.name);
-  const stock = p ? (Number(p.quantity) || 0) : 99999;
-  const newQty = item.qty + delta;
-  if (newQty < 1){
-    cart.splice(idx,1);
-  } else if (stock && newQty > stock){
-    alert(currentLang==="ar" ? "الكمية أكبر من المخزون" : "Quantity exceeds stock");
-    return;
-  } else {
-    item.qty = newQty;
-  }
-  saveCart();
-  updateCartBadge();
+// CART MODAL
+const cartModal = document.getElementById("cartModal");
+document.getElementById("cartToggle").addEventListener("click", openCart);
+function openCart(){
+  cartModal.style.display = "flex";
   renderCart();
+}
+function closeCart(){
+  cartModal.style.display = "none";
+}
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  box.innerHTML = "";
+  const rate = getRate();
+  let subtotal = 0;
+  let total = 0;
+  const discountPct = currentClient.discount || 0;
+  let discountAmount = 0;
+
+  const clientInfoDiv = document.getElementById("cartClientInfo");
+  if(currentClient.name){
+    clientInfoDiv.style.display = "block";
+    clientInfoDiv.textContent = (currentLang==="ar" ? "العميل: " : "Client: ") + currentClient.name +
+      (discountPct ? " — " + (currentLang==="ar" ? "خصم" : "Discount") + " " + discountPct + "%" : "");
+  } else {
+    clientInfoDiv.style.display = "none";
+  }
+
+  if(!cart.length){
+    box.innerHTML = `<div style="color:#64748b;font-size:13px;">${currentLang==="ar" ? "السلة فارغة" : "Cart is empty"}</div>`;
+  } else {
+    cart.forEach((item, idx) => {
+      const line = item.price ? Number(item.price) * item.qty : 0;
+      subtotal += line;
+      const title = currentLang==="ar" ? (item.name_ar || item.name || item.sku || "بدون اسم") : (item.name || item.sku || "no name");
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        <div>
+          <div class="cart-item-title">${title}</div>
+          <div class="cart-item-qty">${currentLang==="ar" ? "الكمية" : "Qty"}: ${item.qty} × ${(item.price||0)} USD</div>
+        </div>
+        <div>
+          <div style="font-weight:600">${line.toFixed(2)} USD</div>
+          <button class="close-btn" onclick="removeFromCart(${idx})">${currentLang==="ar" ? "حذف" : "Remove"}</button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  }
+
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
+    total = subtotal - discountAmount;
+  } else {
+    total = subtotal;
+  }
+
+  document.getElementById("cartSubtotal").textContent = (currentLang==="ar" ? "المجموع قبل الخصم: " : "Subtotal: ") + subtotal.toFixed(2) + " USD";
+  const discDiv = document.getElementById("cartDiscount");
+  if(discountPct){
+    discDiv.style.display = "block";
+    discDiv.textContent = (currentLang==="ar" ? "الخصم (" : "Discount (") + discountPct + "%): -" + discountAmount.toFixed(2) + " USD";
+  } else {
+    discDiv.style.display = "none";
+  }
+  document.getElementById("cartTotalUSD").textContent = (currentLang==="ar" ? "الإجمالي: " : "Total: ") + total.toFixed(2) + " USD";
+  document.getElementById("cartTotalLBP").textContent = Math.round(total*rate).toLocaleString("en-LB") + " LBP";
 }
 
 function removeFromCart(idx){
@@ -334,92 +682,53 @@ function clearCart(){
   renderCart();
 }
 
-function renderCart(){
-  const box = document.getElementById("cartItems");
-  const info = document.getElementById("cartClientInfo");
-  box.innerHTML = "";
-  let subtotal = 0;
-
-  cart.forEach((item, idx) => {
-    const line = item.price * item.qty;
-    subtotal += line;
-    const div = document.createElement("div");
-    div.className = "cart-item";
-    div.innerHTML = `
-      <div>
-        <div style="font-weight:600;font-size:13px">${currentLang==="ar" ? (item.name_ar || item.name) : (item.name || item.name_ar)}</div>
-        <div style="font-size:12px;color:#475569">${currentLang==="ar" ? "سعر" : "Price"}: ${item.price.toFixed(2)} USD</div>
-      </div>
-      <div class="qty-edit">
-        <button onclick="changeCartQty(${idx}, -1)">-</button>
-        <span>${item.qty}</span>
-        <button onclick="changeCartQty(${idx}, 1)">+</button>
-      </div>
-      <div>
-        <div style="font-weight:600">${line.toFixed(2)} USD</div>
-        <button class="close-btn" onclick="removeFromCart(${idx})">${currentLang==="ar" ? "حذف" : "Remove"}</button>
-      </div>
-    `;
-    box.appendChild(div);
-  });
-
-  // client info
-  if (currentClient.name){
-    info.style.display = "block";
-    info.textContent = (currentLang==="ar" ? "العميل: " : "Client: ") + currentClient.name +
-      (currentClient.discount ? " — " + (currentLang==="ar" ? "خصم" : "Discount") + " " + currentClient.discount + "%" : "");
-  } else {
-    info.style.display = "none";
-  }
-
-  const discountPct = currentClient.discount || 0;
-  let discountAmount = 0;
-  let total = subtotal;
-
-  if (discountPct){
-    discountAmount = subtotal * (discountPct / 100);
-    total = subtotal - discountAmount;
-    document.getElementById("cartDiscount").style.display = "block";
-    document.getElementById("cartDiscount").textContent =
-      (currentLang==="ar" ? "الخصم" : "Discount") + ` (${discountPct}%): -${discountAmount.toFixed(2)} USD`;
-  } else {
-    document.getElementById("cartDiscount").style.display = "none";
-  }
-
-  document.getElementById("cartSubtotal").textContent =
-    (currentLang==="ar" ? "المجموع قبل الخصم: " : "Subtotal: ") + subtotal.toFixed(2) + " USD";
-  document.getElementById("cartTotalUSD").textContent =
-    (currentLang==="ar" ? "الإجمالي: " : "Total: ") + total.toFixed(2) + " USD";
-  document.getElementById("cartTotalLBP").textContent =
-    Math.round(total * RATE).toLocaleString("en-LB") + " LBP";
-}
-
 function checkoutCart(){
-  if (!cart.length){
+  if(!cart.length){
     alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
     return;
   }
+  // check stock and deduct locally
+  const rate = getRate();
   const discountPct = currentClient.discount || 0;
   let subtotal = 0;
   let msg = "";
-
   msg += (currentLang==="ar" ? "العميل: " : "Client: ") + (currentClient.name || (currentLang==="ar" ? "غير معروف" : "Unknown")) + "\n";
-  if (discountPct){
+  if(discountPct){
     msg += (currentLang==="ar" ? "الخصم: " : "Discount: ") + discountPct + "%\n\n";
   } else {
     msg += "\n";
   }
-  msg += (currentLang==="ar" ? "مرحبا، أريد الطلب:\n" : "Hello, I would like to order:\n");
+  msg += (currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n");
 
+  // check stock
+  for(const item of cart){
+    const p = products.find(x => x.sku === item.sku) || products.find(x => (x.name===item.name));
+    if(!p) continue;
+    const stock = Number(p.quantity) || 0;
+    if(item.qty > stock){
+      alert(currentLang==="ar" ? "الكمية المطلوبة غير متوفرة: " + (p.name_ar || p.name) : "Requested qty not available: " + (p.name || p.name_ar));
+      return;
+    }
+  }
+
+  // build lines
   cart.forEach(item => {
-    const line = item.price * item.qty;
+    const p = products.find(x => x.sku === item.sku) || products.find(x => (x.name===item.name));
+    const title = currentLang==="ar" ? (p?.name_ar || p?.name || item.name_ar || item.name || item.sku) : (p?.name || item.name || item.sku);
+    const line = (item.price ? Number(item.price) : 0) * item.qty;
     subtotal += line;
-    msg += `- ${(currentLang==="ar" ? (item.name_ar || item.name) : (item.name || item.name_ar))} × ${item.qty} = ${line.toFixed(2)} USD\n`;
+    msg += `- ${title} × ${item.qty} = ${line.toFixed(2)} USD\n`;
+    // deduct locally
+    if(p){
+      p.quantity = (Number(p.quantity) || 0) - item.qty;
+      if(p.quantity < 0) p.quantity = 0;
+    }
   });
 
   let total = subtotal;
-  if (discountPct){
-    const discountAmount = subtotal * (discountPct/100);
+  let discountAmount = 0;
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
     total = subtotal - discountAmount;
     msg += (currentLang==="ar"
       ? `المجموع قبل الخصم: ${subtotal.toFixed(2)} USD\n`
@@ -429,51 +738,122 @@ function checkoutCart(){
       : `Discount (${discountPct}%): -${discountAmount.toFixed(2)} USD\n`);
   }
   msg += (currentLang==="ar"
-    ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*RATE).toLocaleString("en-LB")} LBP)`
-    : `Total: ${total.toFixed(2)} USD (${Math.round(total*RATE).toLocaleString("en-LB")} LBP)`);
+    ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`
+    : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`);
 
-  const waUrl = `https://wa.me/96181085811?text=${encodeURIComponent(msg)}`;
+  // open WhatsApp
+  const wa = localStorage.getItem(WA_KEY) || "96181085811";
+  const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, "_blank");
 
+  // clear cart + re-render
   clearCart();
+  render();
 }
 
-// ====== LANG TOGGLE ======
-document.getElementById("langToggle").addEventListener("click", ()=>{
+// CLIENT HANDLING
+const clientInput = document.getElementById("clientName");
+clientInput.addEventListener("change", e => {
+  const name = e.target.value.trim();
+  matchClient(name);
+});
+clientInput.addEventListener("blur", e => {
+  const name = e.target.value.trim();
+  matchClient(name);
+});
+
+function matchClient(name){
+  if(!name){
+    currentClient = { name:"", discount:0, whatsapp:"" };
+    document.getElementById("clientDiscountBadge").style.display = "none";
+    document.getElementById("clientNotFound").style.display = "none";
+    localStorage.removeItem(CLIENT_NAME_KEY);
+    return;
+  }
+  const found = clients.find(c => (c.name || "").toLowerCase() === name.toLowerCase());
+  if(found){
+    currentClient = {
+      name: found.name,
+      discount: Number(found.discount) || 0,
+      whatsapp: found.whatsapp || ""
+    };
+    document.getElementById("clientDiscountBadge").style.display = "inline-block";
+    document.getElementById("clientDiscountBadge").textContent =
+      (currentLang==="ar" ? "خصم: " : "Discount: ") + currentClient.discount + "%";
+    document.getElementById("clientNotFound").style.display = "none";
+    localStorage.setItem(CLIENT_NAME_KEY, currentClient.name);
+  } else {
+    currentClient = { name, discount:0, whatsapp:"" };
+    document.getElementById("clientDiscountBadge").style.display = "none";
+    document.getElementById("clientNotFound").style.display = "inline-block";
+    localStorage.setItem(CLIENT_NAME_KEY, name);
+  }
+  // refresh cart to show new discount
+  renderCart();
+}
+
+// ADMIN
+const adminGear = document.getElementById("adminGear");
+const adminFlag = document.getElementById("adminFlag");
+adminGear.addEventListener("click", () => {
+  const pw = prompt(currentLang==="ar" ? "ادخل كلمة السر:" : "Enter admin password:");
+  if(pw === ADMIN_PW){
+    adminFlag.style.display = "inline-block";
+    document.getElementById("adminControls").style.display = "block";
+    alert(currentLang==="ar"
+      ? "تم تفعيل لوحة التحكم. لتحديث المنتجات والعملاء ارفع products.json و clients.json إلى GitHub."
+      : "Admin enabled. To update products and clients, upload products.json and clients.json to GitHub.");
+  } else {
+    alert(currentLang==="ar" ? "كلمة السر غير صحيحة" : "Wrong password");
+  }
+});
+
+// LANG
+document.getElementById("langToggle").addEventListener("click", () => {
   currentLang = currentLang === "en" ? "ar" : "en";
   applyLang();
-  renderProducts();
+  buildCategories();
+  render();
   renderCart();
 });
 
 function applyLang(){
-  if (currentLang === "ar"){
-    document.body.dir = "rtl";
+  const header = document.getElementById("topHeader");
+  if(currentLang === "ar"){
+    header.dir = "rtl";
     document.getElementById("langToggle").textContent = "EN";
-    document.getElementById("clientNameLabel").textContent = "اسم العميل";
-    clientInput.placeholder = "اكتب الاسم أو رقم الواتساب...";
-    helper.textContent = "يمكنك إدخال الاسم أو رقم الواتساب";
     document.getElementById("search").placeholder = "بحث عن منتج...";
+    document.getElementById("waLabel").textContent = "واتساب:";
+    document.getElementById("companySlogan").textContent = "أفضل جودة";
     document.getElementById("cartTitle").textContent = "السلة";
     document.getElementById("closeCartBtn").textContent = "إغلاق";
     document.getElementById("clearCartBtn").textContent = "مسح";
     document.getElementById("checkoutBtn").textContent = "ارسال الى واتساب";
+    document.getElementById("clientNameLabel").textContent = "اسم العميل";
   } else {
-    document.body.dir = "ltr";
+    header.dir = "ltr";
     document.getElementById("langToggle").textContent = "AR";
-    document.getElementById("clientNameLabel").textContent = "Client name";
-    clientInput.placeholder = "Type your name or WhatsApp number...";
-    helper.textContent = "You can enter name or WhatsApp number";
     document.getElementById("search").placeholder = "Search products...";
+    document.getElementById("waLabel").textContent = "WhatsApp:";
+    document.getElementById("companySlogan").textContent = "Best Quality";
     document.getElementById("cartTitle").textContent = "Cart";
     document.getElementById("closeCartBtn").textContent = "Close";
     document.getElementById("clearCartBtn").textContent = "Clear";
     document.getElementById("checkoutBtn").textContent = "Send to WhatsApp";
+    document.getElementById("clientNameLabel").textContent = "Client name";
   }
+  setLastUpdated();
 }
+
+// search + filter
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filterCat").addEventListener("change", render);
 
 // init
 applyLang();
+updateCartBadge();
+loadProducts();
+loadClients();
 </script>
 </body>
 </html>
