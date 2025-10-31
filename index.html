@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>WhitePack — Online Catalogue (v6.1)</title>
+<title>WhitePack — Online Catalogue (v6.2)</title>
 <style>
 :root { --bg:#f5fff8; --accent:#3b7a3a; --accent2:#6ecf6e; --muted:#4b6b4b; --card:#fff; }
 *{box-sizing:border-box}
@@ -23,6 +23,8 @@ h1{margin:0;font-size:20px;color:#1f401d}
 .helper-text{font-size:11px;color:#475569;margin-top:-6px;display:block}
 #clientDiscountBadge{background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:9999px;font-size:12px;display:none}
 #clientNotFound{font-size:11.5px;color:#b91c1c;display:none}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+#search{flex:1;padding:9px 10px;border:1px solid rgba(0,0,0,0.06);border-radius:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
 .card{background:var(--card);border-radius:12px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,0.06);display:flex;flex-direction:column;gap:6px;min-height:270px;overflow:hidden}
 .card-img{width:100%;aspect-ratio:1/1;background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
@@ -33,6 +35,14 @@ h1{margin:0;font-size:20px;color:#1f401d}
 .price small{display:block;color:#557;font-weight:400;font-size:.65rem}
 .out-stock{color:#b91c1c;font-size:12px;font-weight:600;margin-top:4px}
 .footer{background:#d8f0d8;padding:12px;text-align:center;font-size:14px;color:#1e3a1e;margin-top:18px;border-top:1px solid rgba(0,0,0,0.03)}
+/* cart modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);z-index:1000}
+.modal .panel{width:96%;max-width:540px;background:#fff;border-radius:12px;padding:14px;max-height:90vh;overflow-y:auto;box-shadow:0 10px 25px rgba(0,0,0,.22)}
+.cart-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #e2e8f0;padding-bottom:6px;margin-bottom:6px}
+.qty-edit{display:flex;gap:3px;align-items:center}
+.qty-edit button{width:22px;height:22px;border:none;background:#e2e8f0;border-radius:4px;cursor:pointer}
+.close-btn{border:none;background:#e2e8f0;border-radius:6px;padding:3px 8px;cursor:pointer}
+.checkout-btn{border:none;background:#166534;color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer}
 @media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}header{flex-wrap:wrap}.client-box{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -47,6 +57,7 @@ h1{margin:0;font-size:20px;color:#1f401d}
     <div><strong>WhatsApp:</strong> <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
     <div class="top-actions">
       <button id="langToggle" class="lang-btn">AR</button>
+      <button id="cartToggle" class="cart-btn">🛒 <span id="cartCount" class="cart-badge">0</span></button>
     </div>
   </div>
 </header>
@@ -61,58 +72,356 @@ h1{margin:0;font-size:20px;color:#1f401d}
     <div id="clientDiscountBadge">Discount: 0%</div>
     <div id="clientNotFound">No discount for this client</div>
   </div>
+
+  <div class="controls">
+    <input id="search" placeholder="Search products..." />
+  </div>
+
   <div id="grid" class="grid"></div>
   <div class="footer"><strong>Best Quality</strong> — WhatsApp: <a href="https://wa.me/96181085811" target="_blank">+961 81 085 811</a></div>
 </main>
 
+<!-- CART MODAL -->
+<div id="cartModal" class="modal">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 id="cartTitle" style="margin:0;font-size:15px">Cart</h2>
+      <button onclick="closeCart()" class="close-btn" id="closeCartBtn">X</button>
+    </div>
+    <div id="cartClientInfo" style="font-size:12px;color:#475569;margin-bottom:6px;display:none"></div>
+    <div id="cartItems"></div>
+    <div style="border-top:1px solid #e2e8f0;margin-top:6px;padding-top:6px">
+      <div id="cartSubtotal">Subtotal: 0 USD</div>
+      <div id="cartDiscount" style="color:#b91c1c;font-size:12px;display:none"></div>
+      <div id="cartTotalUSD" style="font-weight:600;margin-top:4px">Total: 0 USD</div>
+      <div id="cartTotalLBP" style="font-size:12px;color:#475569">0 LBP</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;margin-top:10px">
+      <button onclick="clearCart()" class="close-btn" id="clearCartBtn">Clear</button>
+      <button onclick="checkoutCart()" class="checkout-btn" id="checkoutBtn">Send to WhatsApp</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CLIENTS_URL = "https://yallawassel.github.io/whitepack_store/clients.json";
-let clients=[];let currentLang="en";
-let currentClient={name:"",discount:0,whatsapp:""};
-async function loadClients(){try{const res=await fetch(CLIENTS_URL+"?t="+Date.now());clients=await res.json();}catch(e){clients=[];}}
-loadClients();
+const DATA_URL = "https://yallawassel.github.io/whitepack_store/products.json";
+const CART_KEY = "whitepack_cart_v62";
+const RATE = 90000; // 1 USD = 90,000 LBP (can change later)
 
-const input=document.getElementById("clientName");
-const helper=document.getElementById("helperText");
-input.addEventListener("input",()=>{helper.style.display=input.value.trim()?"none":"block";});
-input.addEventListener("change",()=>{matchClient(input.value.trim());});
+let clients = [];
+let products = [];
+let cart = [];
+let currentLang = "en";
+let currentClient = { name: "", discount: 0, whatsapp: "" };
+
+// load saved cart
+cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+updateCartBadge();
+
+// LOAD DATA
+async function loadClients() {
+  try { const res = await fetch(CLIENTS_URL + "?t=" + Date.now()); clients = await res.json(); }
+  catch(e){ clients = []; }
+}
+async function loadProducts() {
+  try { const res = await fetch(DATA_URL + "?t=" + Date.now()); products = await res.json(); renderProducts(); }
+  catch(e){ products = []; }
+}
+loadClients();
+loadProducts();
+
+// RENDER PRODUCTS
+function renderProducts() {
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  grid.innerHTML = "";
+  products
+    .filter(p => !q || (p.name && p.name.toLowerCase().includes(q)) || (p.sku && p.sku.toLowerCase().includes(q)))
+    .forEach((p, idx) => {
+      const available = Number(p.quantity) > 0;
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <div class="card-img"><img src="${p.image || ""}" alt="${p.name || ""}" onerror="this.style.display='none'"></div>
+        <h3>${currentLang==="ar" ? (p.name_ar || p.name || "") : (p.name || "")}</h3>
+        <p>${currentLang==="ar" ? (p.description_ar || "") : (p.description || "")}</p>
+        <div class="price">${p.price ? Number(p.price).toFixed(2) + " USD" : ""}<small>${p.price ? (Number(p.price) * RATE).toLocaleString("en-LB") + " LBP" : ""}</small></div>
+        ${available ? "" : `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>`}
+        <button class="cart-btn" style="margin-top:auto;${!available ? "opacity:.5;pointer-events:none" : ""}" onclick="addToCart(${idx})">
+          ${currentLang==="ar" ? "أضف إلى السلة" : "Add to Cart"}
+        </button>
+      `;
+      grid.appendChild(div);
+    });
+  if(!grid.innerHTML){
+    grid.innerHTML = `<div style="color:#64748b">${currentLang==="ar" ? "لا يوجد منتجات" : "No products"}</div>`;
+  }
+}
+
+// SEARCH
+document.getElementById("search").addEventListener("input", renderProducts);
+
+// CLIENT HANDLING
+const clientInput = document.getElementById("clientName");
+const helper = document.getElementById("helperText");
+
+clientInput.addEventListener("input", () => {
+  helper.style.display = clientInput.value.trim() ? "none" : "block";
+});
+
+clientInput.addEventListener("change", () => {
+  matchClient(clientInput.value.trim());
+});
 
 function normalizePhone(num){return(num||"").replace(/\D/g,"").replace(/^0+/,"").replace(/^961/,"");}
 
 function matchClient(name){
- if(!name){resetClient();return;}
- const clean=name.toLowerCase();
- const cleanNum=normalizePhone(name);
- const found=clients.find(c=> (c.name&&c.name.toLowerCase()===clean) ||
-   (c.whatsapp&&normalizePhone(c.whatsapp).includes(cleanNum)) );
- if(found){currentClient={name:found.name,discount:Number(found.discount)||0,whatsapp:found.whatsapp||""};
-  document.getElementById("clientDiscountBadge").style.display="inline-block";
-  document.getElementById("clientDiscountBadge").textContent=(currentLang==="ar"?"خصم: ":"Discount: ")+currentClient.discount+"%";
-  document.getElementById("clientNotFound").style.display="none";
- }else{resetClient();document.getElementById("clientNotFound").style.display="inline-block";}
+  if(!name){
+    currentClient = { name:"", discount:0, whatsapp:"" };
+    document.getElementById("clientDiscountBadge").style.display="none";
+    document.getElementById("clientNotFound").style.display="none";
+    renderCart();
+    return;
+  }
+  const clean = name.toLowerCase();
+  const cleanNum = normalizePhone(name);
+  const found = clients.find(c =>
+    (c.name && c.name.toLowerCase() === clean) ||
+    (c.whatsapp && normalizePhone(c.whatsapp).includes(cleanNum))
+  );
+  if(found){
+    currentClient = {
+      name: found.name,
+      discount: Number(found.discount) || 0,
+      whatsapp: found.whatsapp || ""
+    };
+    document.getElementById("clientDiscountBadge").style.display="inline-block";
+    document.getElementById("clientDiscountBadge").textContent =
+      (currentLang==="ar" ? "خصم: " : "Discount: ") + currentClient.discount + "%";
+    document.getElementById("clientNotFound").style.display="none";
+  } else {
+    currentClient = { name, discount: 0, whatsapp: "" };
+    document.getElementById("clientDiscountBadge").style.display="none";
+    document.getElementById("clientNotFound").style.display="inline-block";
+  }
+  renderCart();
 }
 
-function resetClient(){currentClient={name:"",discount:0,whatsapp:""};
- document.getElementById("clientDiscountBadge").style.display="none";
- document.getElementById("clientNotFound").style.display="none";
+// CART
+function addToCart(idx){
+  const p = products[idx];
+  const uniqueId = p.sku && p.sku.trim() !== "" ? p.sku : (p.name || "item") + "_" + idx;
+  const inCart = cart.find(item => item.id === uniqueId);
+  const stock = Number(p.quantity) || 0;
+  if(inCart){
+    if(inCart.qty + 1 > stock){
+      alert(currentLang==="ar" ? "لا يمكن إضافة أكثر من المتوفر" : "Cannot add more than in stock");
+      return;
+    }
+    inCart.qty += 1;
+  } else {
+    if(stock <= 0){
+      alert(currentLang==="ar" ? "غير متوفر" : "Out of stock");
+      return;
+    }
+    cart.push({
+      id: uniqueId,
+      sku: p.sku || "",
+      name: p.name || "",
+      name_ar: p.name_ar || "",
+      price: Number(p.price) || 0,
+      qty: 1
+    });
+  }
+  saveCart();
+  updateCartBadge();
+  renderCart();
+  openCart();
 }
 
-document.getElementById("langToggle").addEventListener("click",()=>{
- currentLang=currentLang==="en"?"ar":"en";
- if(currentLang==="ar"){
-   document.body.dir="rtl";
-   document.getElementById("langToggle").textContent="EN";
-   document.getElementById("clientNameLabel").textContent="اسم العميل";
-   input.placeholder="اكتب الاسم أو رقم الواتساب...";
-   helper.textContent="يمكنك إدخال الاسم أو رقم الواتساب";
- }else{
-   document.body.dir="ltr";
-   document.getElementById("langToggle").textContent="AR";
-   document.getElementById("clientNameLabel").textContent="Client name";
-   input.placeholder="Type your name or WhatsApp number...";
-   helper.textContent="You can enter name or WhatsApp number";
- }
+function saveCart(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+function updateCartBadge(){
+  const count = cart.reduce((s,i)=>s+i.qty, 0);
+  document.getElementById("cartCount").textContent = count;
+}
+
+const cartModal = document.getElementById("cartModal");
+document.getElementById("cartToggle").addEventListener("click", openCart);
+function openCart(){ cartModal.style.display="flex"; renderCart(); }
+function closeCart(){ cartModal.style.display="none"; }
+
+function changeCartQty(idx, delta){
+  const item = cart[idx];
+  if(!item) return;
+  const p = products.find(x => x.sku === item.sku) || products.find(x => x.name === item.name);
+  const stock = p ? (Number(p.quantity) || 0) : 999999;
+  const newQty = item.qty + delta;
+  if(newQty < 1){ cart.splice(idx,1); }
+  else if(newQty > stock){
+    alert(currentLang==="ar" ? "الكمية أكبر من المخزون" : "Quantity exceeds stock");
+    return;
+  } else {
+    item.qty = newQty;
+  }
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function removeFromCart(idx){
+  cart.splice(idx,1);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function clearCart(){
+  cart = [];
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  const info = document.getElementById("cartClientInfo");
+  box.innerHTML = "";
+  let subtotal = 0;
+  cart.forEach((item, idx) => {
+    const line = item.price * item.qty;
+    subtotal += line;
+    const div = document.createElement("div");
+    div.className = "cart-item";
+    div.innerHTML = `
+      <div>
+        <div style="font-weight:600;font-size:13px">${currentLang==="ar" ? (item.name_ar || item.name) : (item.name || item.name_ar)}</div>
+        <div style="font-size:12px;color:#475569">${currentLang==="ar" ? "سعر" : "Price"}: ${item.price.toFixed(2)} USD</div>
+      </div>
+      <div class="qty-edit">
+        <button onclick="changeCartQty(${idx}, -1)">-</button>
+        <span>${item.qty}</span>
+        <button onclick="changeCartQty(${idx}, 1)">+</button>
+      </div>
+      <div>
+        <div style="font-weight:600">${line.toFixed(2)} USD</div>
+        <button class="close-btn" onclick="removeFromCart(${idx})">${currentLang==="ar" ? "حذف" : "Remove"}</button>
+      </div>
+    `;
+    box.appendChild(div);
+  });
+
+  // client info
+  if (currentClient.name){
+    info.style.display = "block";
+    info.textContent = (currentLang==="ar" ? "العميل: " : "Client: ") + currentClient.name +
+      (currentClient.discount ? " — " + (currentLang==="ar" ? "خصم" : "Discount") + " " + currentClient.discount + "%" : "");
+  } else {
+    info.style.display = "none";
+  }
+
+  const discountPct = currentClient.discount || 0;
+  let discountAmount = 0;
+  let total = subtotal;
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
+    total = subtotal - discountAmount;
+    document.getElementById("cartDiscount").style.display="block";
+    document.getElementById("cartDiscount").textContent =
+      (currentLang==="ar" ? "الخصم" : "Discount") + ` (${discountPct}%): -${discountAmount.toFixed(2)} USD`;
+  } else {
+    document.getElementById("cartDiscount").style.display="none";
+  }
+
+  document.getElementById("cartSubtotal").textContent =
+    (currentLang==="ar" ? "المجموع قبل الخصم: " : "Subtotal: ") + subtotal.toFixed(2) + " USD";
+  document.getElementById("cartTotalUSD").textContent =
+    (currentLang==="ar" ? "الإجمالي: " : "Total: ") + total.toFixed(2) + " USD";
+  document.getElementById("cartTotalLBP").textContent =
+    Math.round(total * RATE).toLocaleString("en-LB") + " LBP";
+}
+
+// CHECKOUT
+function checkoutCart(){
+  if(!cart.length){
+    alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
+    return;
+  }
+  const discountPct = currentClient.discount || 0;
+  let subtotal = 0;
+  let msg = "";
+  msg += (currentLang==="ar" ? "العميل: " : "Client: ") + (currentClient.name || (currentLang==="ar" ? "غير معروف" : "Unknown")) + "\n";
+  if(discountPct){ msg += (currentLang==="ar" ? "الخصم: " : "Discount: ") + discountPct + "%\n\n"; } else { msg += "\n"; }
+  msg += (currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n");
+
+  cart.forEach(item => {
+    const line = item.price * item.qty;
+    subtotal += line;
+    msg += `- ${(currentLang==="ar" ? (item.name_ar || item.name) : (item.name || item.name_ar))} × ${item.qty} = ${line.toFixed(2)} USD\n`;
+  });
+
+  let total = subtotal;
+  let discountAmount = 0;
+  if(discountPct){
+    discountAmount = subtotal * (discountPct/100);
+    total = subtotal - discountAmount;
+    msg += (currentLang==="ar"
+      ? `المجموع قبل الخصم: ${subtotal.toFixed(2)} USD\n`
+      : `Subtotal: ${subtotal.toFixed(2)} USD\n`);
+    msg += (currentLang==="ar"
+      ? `الخصم (${discountPct}%): -${discountAmount.toFixed(2)} USD\n`
+      : `Discount (${discountPct}%): -${discountAmount.toFixed(2)} USD\n`);
+  }
+  msg += (currentLang==="ar"
+    ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*RATE).toLocaleString("en-LB")} LBP)`
+    : `Total: ${total.toFixed(2)} USD (${Math.round(total*RATE).toLocaleString("en-LB")} LBP)`);
+
+  const waUrl = `https://wa.me/96181085811?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, "_blank");
+
+  // keep cart or clear?
+  clearCart();
+}
+
+// LANG TOGGLE
+document.getElementById("langToggle").addEventListener("click", () => {
+  currentLang = currentLang === "en" ? "ar" : "en";
+  applyLang();
+  renderProducts();
+  renderCart();
 });
+
+function applyLang(){
+  if(currentLang === "ar"){
+    document.body.dir = "rtl";
+    document.getElementById("langToggle").textContent = "EN";
+    document.getElementById("clientNameLabel").textContent = "اسم العميل";
+    clientInput.placeholder = "اكتب الاسم أو رقم الواتساب...";
+    helper.textContent = "يمكنك إدخال الاسم أو رقم الواتساب";
+    document.getElementById("search").placeholder = "بحث عن منتج...";
+    document.getElementById("cartTitle").textContent = "السلة";
+    document.getElementById("closeCartBtn").textContent = "إغلاق";
+    document.getElementById("clearCartBtn").textContent = "مسح";
+    document.getElementById("checkoutBtn").textContent = "ارسال الى واتساب";
+  } else {
+    document.body.dir = "ltr";
+    document.getElementById("langToggle").textContent = "AR";
+    document.getElementById("clientNameLabel").textContent = "Client name";
+    clientInput.placeholder = "Type your name or WhatsApp number...";
+    helper.textContent = "You can enter name or WhatsApp number";
+    document.getElementById("search").placeholder = "Search products...";
+    document.getElementById("cartTitle").textContent = "Cart";
+    document.getElementById("closeCartBtn").textContent = "Close";
+    document.getElementById("clearCartBtn").textContent = "Clear";
+    document.getElementById("checkoutBtn").textContent = "Send to WhatsApp";
+  }
+}
+
+// init lang texts
+applyLang();
 </script>
 </body>
 </html>
