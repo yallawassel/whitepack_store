@@ -2,177 +2,157 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WhitePack Admin (Products + Clients) v7.1</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WhitePack Admin Panel (Always Export)</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f5fff8;margin:0;padding:20px;color:#213;}
+body{
+  font-family: Arial, sans-serif;
+  background:#f5fff8;
+  color:#213;
+  margin:0;
+  padding:20px;
+}
 h1{color:#2e7d32;}
-.card{background:#fff;padding:16px 18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px;}
-label{font-weight:600;display:block;margin-top:8px;}
-input,button,textarea{border-radius:6px;border:1px solid #ccc;font-size:14px;}
-input,textarea{width:100%;padding:8px;margin-top:3px;margin-bottom:10px;}
-button{background:linear-gradient(90deg,#6ecf6e,#3b7a3a);color:#fff;border:none;padding:9px 14px;cursor:pointer;font-weight:600;margin-right:8px;}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+label{font-weight:bold;}
+input,button{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+input{width:100%;margin-top:4px;margin-bottom:12px;}
+button{
+  background:linear-gradient(90deg,#6ecf6e,#3b7a3a);
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
 button:hover{opacity:.9;}
-.note{background:#e8f5e9;padding:8px 10px;border-left:4px solid #43a047;border-radius:6px;font-size:13px;margin-top:8px;}
-.row{display:flex;gap:14px;flex-wrap:wrap;}
-.col{flex:1 1 230px;}
-textarea{height:180px;}
+.note{
+  background:#e8f5e9;
+  padding:10px;
+  border-left:4px solid #43a047;
+  border-radius:8px;
+  font-size:13px;
+}
+textarea{
+  width:100%;
+  height:220px;
+  font-family:monospace;
+  font-size:13px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  padding:10px;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-<h1>📦 WhitePack Admin (Single Catalogue) — v7.1</h1>
+<h1>📦 WhitePack Admin Panel — Always Export</h1>
 
 <div class="card">
-  <h3>1️⃣ Upload Excel (with 2 sheets)</h3>
+  <h3>Step 1️⃣ — Upload Excel file</h3>
   <input type="file" id="excelFile" accept=".xlsx,.xls" />
-  <div class="note">
-    Sheet <b>Products</b> → SKU, Name, Name_ar, Category, Category_ar, Description, Description_ar, Price, Quantity, Image, WhatsApp<br>
-    Sheet <b>Clients</b> → Name, Discount, WhatsApp (number or text, we will export as string)
-  </div>
+  <div class="note">Headers required: <b>SKU, Name, Name_ar, Category, Category_ar, Description, Description_ar, Price, Quantity, Image, WhatsApp</b></div>
 </div>
 
 <div class="card">
-  <h3>2️⃣ Settings</h3>
-  <div class="row">
-    <div class="col">
-      <label>💵 USD → LBP Rate</label>
-      <input id="rateInput" type="number" value="90000" />
-    </div>
-    <div class="col">
-      <label>📱 Default WhatsApp</label>
-      <input id="waInput" type="text" value="96181085811" />
-    </div>
-  </div>
-  <button onclick="saveSettings()">Save settings</button>
+  <h3>Step 2️⃣ — Settings</h3>
+  <label>💵 USD → LBP Rate:</label>
+  <input type="number" id="rateInput" value="90000" step="100" />
+  <label>📱 WhatsApp Number:</label>
+  <input type="text" id="waInput" value="96181085811" />
+  <button onclick="saveSettings()">Save Settings</button>
+  <div class="note">Saved locally — used when you export.</div>
 </div>
 
 <div class="card">
-  <h3>3️⃣ Export</h3>
-  <button onclick="exportProducts()">Export products.json</button>
-  <button onclick="exportClients()">Export clients.json</button>
-  <div class="note">Upload both JSON files to GitHub → your catalogue (v7.1) will use them.</div>
+  <h3>Step 3️⃣ — Export JSON</h3>
+  <button onclick="exportJSON()">Export products.json</button>
+  <div class="note">If the file doesn’t auto-download, it will open in a new tab so you can <b>Ctrl+S → Save As products.json</b>.</div>
 </div>
 
 <div class="card">
-  <h3>📄 Preview</h3>
+  <h3>📄 Preview JSON</h3>
   <textarea id="jsonOutput" readonly></textarea>
 </div>
 
 <script>
-let productsSheet = [];
-let clientsSheet = [];
-const RATE_KEY = "internal_catalogue_usd_to_lbp";
-const WA_KEY = "whitepack_whatsapp_number";
-
-document.getElementById('rateInput').value = localStorage.getItem(RATE_KEY) || "90000";
-document.getElementById('waInput').value = localStorage.getItem(WA_KEY) || "96181085811";
-
-document.getElementById('excelFile').addEventListener('change', handleExcel, false);
-
 function saveSettings(){
-  localStorage.setItem(RATE_KEY, document.getElementById('rateInput').value);
-  localStorage.setItem(WA_KEY, document.getElementById('waInput').value);
-  alert("✅ Settings saved");
+  localStorage.setItem('internal_catalogue_usd_to_lbp',document.getElementById('rateInput').value);
+  localStorage.setItem('whitepack_whatsapp_number',document.getElementById('waInput').value);
+  alert('✅ Settings saved');
 }
 
+let excelData=[];
+document.getElementById('excelFile').addEventListener('change',handleExcel,false);
 function handleExcel(evt){
-  const file = evt.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type:'array' });
-
-    // Products sheet
-    const prodSheet = workbook.Sheets["Products"] || workbook.Sheets[workbook.SheetNames[0]];
-    productsSheet = XLSX.utils.sheet_to_json(prodSheet, { defval: "" });
-
-    // Clients sheet
-    const cliSheet = workbook.Sheets["Clients"];
-    if(cliSheet){
-      clientsSheet = XLSX.utils.sheet_to_json(cliSheet, { defval: "" });
-    } else {
-      clientsSheet = [];
-    }
-
-    alert("✅ Excel loaded\nProducts: " + productsSheet.length + "\nClients: " + clientsSheet.length);
+  const file=evt.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const data=new Uint8Array(e.target.result);
+    const workbook=XLSX.read(data,{type:'array'});
+    const sheet=workbook.Sheets[workbook.SheetNames[0]];
+    excelData=XLSX.utils.sheet_to_json(sheet,{defval:""});
+    alert('✅ Excel loaded — Rows: '+excelData.length);
   };
   reader.readAsArrayBuffer(file);
 }
 
-function normalizeMap(row){
-  const norm = k => k ? k.trim().toLowerCase() : "";
-  const keys = Object.keys(row).reduce((acc,k)=>{ acc[norm(k)] = k; return acc; }, {});
-  return keys;
-}
+function exportJSON(){
+  if(!excelData.length){alert('Upload an Excel file first!');return;}
 
-function exportProducts(){
-  if(!productsSheet.length){
-    alert("Upload Excel (Products) first");
-    return;
-  }
-  const data = productsSheet.map(row => {
-    const keys = normalizeMap(row);
-    const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-    const int = v => isNaN(parseInt(v)) ? 0 : parseInt(v);
-    return {
-      sku: row[keys["sku"]] || "",
-      name: row[keys["name"]] || "",
-      name_ar: row[keys["name_ar"]] || "",
-      category: row[keys["category"]] || "",
-      category_ar: row[keys["category_ar"]] || "",
-      description: row[keys["description"]] || "",
-      description_ar: row[keys["description_ar"]] || "",
-      price: num(row[keys["price"]] || 0),
-      quantity: int(row[keys["quantity"]] || 0),
-      image: row[keys["image"]] || "",
-      whatsapp: row[keys["whatsapp"]] || (localStorage.getItem(WA_KEY) || "")
+  const mapped=excelData.map(row=>{
+    const normalize=k=>k?k.trim().toLowerCase():"";
+    const keys=Object.keys(row).reduce((a,k)=>{a[normalize(k)]=k;return a;},{});
+    const num=v=>isNaN(parseFloat(v))?0:parseFloat(v);
+    const int=v=>isNaN(parseInt(v))?0:parseInt(v);
+    return{
+      sku:row[keys["sku"]]||"",
+      name:row[keys["name"]]||"",
+      name_ar:row[keys["name_ar"]]||"",
+      category:row[keys["category"]]||"",
+      category_ar:row[keys["category_ar"]]||"",
+      description:row[keys["description"]]||"",
+      description_ar:row[keys["description_ar"]]||"",
+      price:num(row[keys["price"]]||row[keys["price usd"]]||row[keys["priceusd"]]||row[keys["prix"]]),
+      quantity:int(row[keys["quantity"]]||row[keys["qty"]]||row[keys["qte"]]),
+      image:row[keys["image"]]||"",
+      whatsapp:row[keys["whatsapp"]]||""
     };
   });
 
-  downloadJSON(data, "products.json");
-}
+  const json=JSON.stringify(mapped,null,2);
+  document.getElementById('jsonOutput').value=json;
 
-function exportClients(){
-  if(!clientsSheet.length){
-    alert("No Clients sheet found — create sheet named 'Clients' in Excel");
-    return;
-  }
-  const data = clientsSheet.map(row => {
-    const keys = normalizeMap(row);
-    const num = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-    // 🔒 always export whatsapp as string
-    let wa = row[keys["whatsapp"]] || "";
-    if (wa !== "") wa = String(wa);
-    return {
-      name: row[keys["name"]] || "",
-      discount: num(row[keys["discount"]] || 0),
-      whatsapp: wa
-    };
-  });
-  downloadJSON(data, "clients.json");
-}
-
-function downloadJSON(data, filename){
-  const json = JSON.stringify(data, null, 2);
-  document.getElementById('jsonOutput').value = json;
-  try {
-    const blob = new Blob([json], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
+  try{
+    const blob=new Blob([json],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="products.json";
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  } catch(e) {
-    const tab = window.open();
-    tab.document.write("<pre>"+json.replace(/</g,"&lt;")+"</pre>");
+    alert('✅ Download started');
+  }catch(e){
+    const newTab=window.open();
+    newTab.document.write('<pre>'+json.replace(/</g,"&lt;")+'</pre>');
   }
-  alert("✅ " + filename + " exported");
 }
 </script>
-
 </body>
 </html>
