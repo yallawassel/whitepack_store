@@ -630,7 +630,7 @@ function checkoutCart(){
     : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`;
 
   // open WhatsApp
-  const wa = localStorage.getItem(WA_KEY) || "96181085811";
+  const wa = localStorage.getItem(WA_KEY) || "96170333029";
   const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, "_blank");
 
@@ -700,5 +700,3 @@ loadProducts();
 </script>
 </body>
 </html>
-
-
