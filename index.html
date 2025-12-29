@@ -614,16 +614,14 @@ function checkoutCart(){
   }
 
   cart.forEach(item => {
-    const p = products.find(x => x.sku === item.sku);
-    const title = currentLang==="ar" ? (p?.name_ar || p?.name || item.sku) : (p?.name || item.sku);
+    const title = currentLang==="ar"
+      ? (item.name_ar || item.name || item.sku)
+      : (item.name || item.sku);
+
     msg += `- ${title} × ${item.qty}\n`;
+
     const line = item.price ? Number(item.price) * item.qty : 0;
     total += line;
-    // deduct locally
-    if(p){
-      p.quantity = (Number(p.quantity) || 0) - item.qty;
-      if(p.quantity < 0) p.quantity = 0;
-    }
   });
 
   msg += currentLang==="ar"
