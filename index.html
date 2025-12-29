@@ -352,6 +352,12 @@ h1 { margin: 0; font-size: 20px; color: #1f401d; }
       <button onclick="closeCart()" class="close-btn" id="closeCartBtn">X</button>
     </div>
     <div id="cartItems"></div>
+<div style="margin:10px 0">
+  <input id="customerName"
+    placeholder="Your name"
+    style="width:100%;padding:8px;border-radius:8px;border:1px solid #e2e8f0;font-size:13px">
+</div>
+
     <div class="cart-totals">
       <div id="cartTotalUSD">Total: 0 USD</div>
       <div id="cartTotalLBP" style="font-size:12px;color:#475569">0 LBP</div>
@@ -595,48 +601,58 @@ function checkoutCart(){
     alert(currentLang==="ar" ? "السلة فارغة" : "Cart is empty");
     return;
   }
-  // check stock again and deduct locally
-  let msg = currentLang==="ar" ? "مرحبا، اريد الطلب:\n" : "Hello, I would like to order:\n";
-  let total = 0;
-  const rate = getRate();
-  let ok = true;
-  cart.forEach(item => {
-    const p = products.find(x => x.sku === item.sku);
-    if(!p) return;
-    const stock = Number(p.quantity) || 0;
-    if(item.qty > stock){
-      ok = false;
-    }
-  });
-  if(!ok){
-    alert(currentLang==="ar" ? "أحد المنتجات غير متوفر بالكمية المطلوبة. عدّل الكمية." : "Some products are not available in that quantity. Please adjust.");
-    return;
+
+  const customerName = document.getElementById("customerName")?.value?.trim();
+
+  let msg = "";
+  if(customerName){
+    msg += currentLang==="ar"
+      ? `الاسم: ${customerName}\n\n`
+      : `Name: ${customerName}\n\n`;
   }
 
+  msg += currentLang==="ar"
+    ? "مرحبا، اريد الطلب:\n"
+    : "Hello, I would like to order:\n";
+
+  // GROUP BY CATEGORY
+  const groups = {};
   cart.forEach(item => {
-    const title = currentLang==="ar"
-      ? (item.name_ar || item.name || item.sku)
-      : (item.name || item.sku);
+    const p = products.find(x => x.sku === item.sku && x.name === item.name) || {};
+    const category = currentLang==="ar"
+      ? (p.category_ar || p.category || "أخرى")
+      : (p.category || "Other");
 
-    msg += `- ${title} × ${item.qty}\n`;
+    if(!groups[category]) groups[category] = [];
+    groups[category].push(item);
+  });
 
-    const line = item.price ? Number(item.price) * item.qty : 0;
-    total += line;
+  let total = 0;
+  const rate = getRate();
+
+  Object.keys(groups).forEach(cat => {
+    msg += `\n*${cat}*\n`;
+    groups[cat].forEach(item => {
+      const title = currentLang==="ar"
+        ? (item.name_ar || item.name || item.sku)
+        : (item.name || item.sku);
+
+      msg += `- ${title} × ${item.qty}\n`;
+      total += (Number(item.price) || 0) * item.qty;
+    });
   });
 
   msg += currentLang==="ar"
-    ? `الإجمالي: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`
-    : `Total: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`;
+    ? `\nالإجمالي: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`
+    : `\nTotal: ${total.toFixed(2)} USD (${Math.round(total*rate).toLocaleString("en-LB")} LBP)`;
 
-  // open WhatsApp
-  const wa = localStorage.getItem(WA_KEY) || "96170333029";
-  const waUrl = `https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;
-  window.open(waUrl, "_blank");
+  const wa = localStorage.getItem("whitepack_whatsapp_number") || "96170333029";
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, "_blank");
 
-  // clear cart + re-render products (to show new stock)
   clearCart();
   render();
 }
+
 
 // ADMIN
 const adminGear = document.getElementById("adminGear");
