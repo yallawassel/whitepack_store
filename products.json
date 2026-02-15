@@ -1,0 +1,41 @@
+[
+  {
+    "sku": "",
+    "name": "paper cups",
+    "name_ar": "كبيات كرتون",
+    "category": "paper",
+    "category_ar": "",
+    "description": "12 oz",
+    "description_ar": "",
+    "price": 0,
+    "quantity": 200,
+    "image": "https://www.globepackaging.co.uk/images/Coffee%20cups%20hot%20drinks%2012oz%20globe%20packaging.jpg",
+    "whatsapp": 81085811
+  },
+  {
+    "sku": "",
+    "name": "trash bags ",
+    "name_ar": "أكياس زبالة",
+    "category": "nylon",
+    "category_ar": "",
+    "description": "small",
+    "description_ar": "",
+    "price": 0,
+    "quantity": 200,
+    "image": "https://baytkon.com/cdn/shop/files/IMG-8780.jpg?v=1754994406&width=823",
+    "whatsapp": ""
+  },
+  {
+    "sku": "",
+    "name": "INTERFOLD BROWN 3KG",
+    "name_ar": "",
+    "category": "",
+    "category_ar": "",
+    "description": "",
+    "description_ar": "",
+    "price": 0,
+    "quantity": 200,
+    "image": "https://klean4you.com.cy/wp-content/uploads/2025/01/1-brown-interfold.jpg",
+    "whatsapp": ""
+  }
+]
