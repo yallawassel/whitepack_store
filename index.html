@@ -449,21 +449,43 @@ function render(){
 
   const card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = `
-    <div class="card-img">
-      <img src="${imagePath}"
-           alt="${name}"
-           loading="lazy"
-           onerror="this.onerror=null;this.src='assets/images/placeholder.jpg';">
+ card.innerHTML = `
+  <div class="card-img">
+    <img src="${imagePath}"
+         alt="${name}"
+         loading="lazy"
+         onerror="this.onerror=null;this.src='assets/images/placeholder.jpg';">
+  </div>
+
+  <h3>${name}</h3>
+  <p>${desc}</p>
+
+  <div class="price">
+    ${priceUSD ? priceUSD + " USD" : ""}
+    ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
+  </div>
+
+  ${!inStock ? `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>` : ""}
+
+  <div class="qty-row">
+    <div class="qty-box">
+      <button onclick="changeQty(${realIndex}, -1)">-</button>
+      <input id="qty-${realIndex}" type="number" min="1" value="1" />
+      <button onclick="changeQty(${realIndex}, 1)">+</button>
     </div>
-    <h3>${name}</h3>
-    <p>${desc}</p>
-    <div class="price">
-      ${priceUSD ? priceUSD + " USD" : ""}
-      ${priceLBP ? `<small>${priceLBP} LBP</small>` : ""}
-    </div>
-    ${!inStock ? `<div class="out-stock">${currentLang==="ar" ? "غير متوفر" : "Out of stock"}</div>` : ""}
-  `;
+
+    <button class="add-btn ${!inStock ? "disabled":""}"
+            onclick="addToCart(${realIndex})"
+            ${!inStock ? "disabled" : ""}>
+      ${currentLang==="ar" ? "إضافة" : "Add to Cart"}
+    </button>
+  </div>
+
+  <div style="font-size:11px;color:#6b6b6b;margin-top:4px">
+    ${currentLang==="ar" ? "الصنف: " : "Category: "}${catName}
+  </div>
+`;
+
 
   grid.appendChild(card);
 });
