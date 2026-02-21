@@ -4,6 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>WhitePack — Online Catalogue</title>
+
+<!-- SPEED BOOST -->
+<link rel="preconnect" href="https://wa.me">
+
 <style>
 :root {
   --bg: #f5fff8;
@@ -450,8 +454,9 @@ function render(){
  card.innerHTML = `
   <div class="card-img">
     <img src="${imagePath}"
-         alt="${name}"
-         loading="lazy"
+     alt="${name}"
+     loading="lazy"
+     decoding="async"
          onerror="this.onerror=null;this.src='assets/images/placeholder.jpg';">
   </div>
 
