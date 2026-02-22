@@ -379,7 +379,13 @@ const WA_KEY = "whitepack_whatsapp_number"; // editable from admin later
 let currentLang = "en";
 let products = [];
 let cart = loadCart();
-
+function applyCategoryFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get("cat");
+  if(cat){
+    document.getElementById("filterCat").value = cat;
+  }
+}
 // load products
 async function loadProducts(){
   try{
@@ -388,7 +394,8 @@ async function loadProducts(){
     products = Array.isArray(data) ? data : (data.products || []);
     setLastUpdated();
     buildCategories();
-    render();
+applyCategoryFromURL();
+render();
   }catch(err){
     document.getElementById("lastUpdated").textContent = currentLang==="ar"
       ? "تعذر تحميل المنتجات من GitHub"
