@@ -434,9 +434,17 @@ function render(){
   filtered.forEach((p) => {
   const realIndex = products.indexOf(p);
 
-  const imagePath = p.image
-    ? `assets/images/products/${p.image}`
-    : `assets/images/placeholder.jpg`;
+  let imagePath = "assets/images/placeholder.jpg";
+
+if (p.image) {
+  if (p.image.startsWith("http")) {
+    // Web image
+    imagePath = p.image;
+  } else {
+    // Local uploaded image
+    imagePath = `assets/images/products/${p.image}`;
+  }
+}
 
   const priceUSD = p.price ? Number(p.price) : null;
   const priceLBP = priceUSD ? Math.round(priceUSD * rate).toLocaleString("en-LB") : null;
