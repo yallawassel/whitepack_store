@@ -1,0 +1,30 @@
+[
+  {
+    "name": "FACIAL&ROLLS TISSUES",
+    "image": "facial-rolls-tissues.jpg"
+  },
+  {
+    "name": "CLEANING PRODUCTS",
+    "image": "cleaning-products.jpg"
+  },
+  {
+    "name": "PLASTIC PRODUCTS",
+    "image": "plastic-products.png"
+  },
+  {
+    "name": "ALUMINIUM PRODUCTS",
+    "image": "aluminium-products.png"
+  },
+  {
+    "name": "FOAM PRODUCTS",
+    "image": "foam-products.png"
+  },
+  {
+    "name": "KRAFT PRODUCTS",
+    "image": "kraft-products.png"
+  },
+  {
+    "name": "FILM WRAPS",
+    "image": "film-wraps.png"
+  }
+]

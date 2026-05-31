@@ -154,5 +154,79 @@ function exportJSON(){
   }
 }
 </script>
+<div class="card">
+  <h3>🖼 Manage Categories</h3>
+  <label>Category Name:</label>
+  <input type="text" id="catName">
+  <label>Image File Name (example: cups.jpg):</label>
+  <input type="text" id="catImage">
+  <button onclick="addCategory()">Add Category</button>
+  <button onclick="exportCategories()">Export categories.json</button>
+  <textarea id="catOutput" style="height:180px"></textarea>
+</div>
+
+<script>
+let categoryData=[];
+
+function addCategory(){
+ const name=document.getElementById("catName").value.trim();
+ const image=document.getElementById("catImage").value.trim();
+ if(!name)return alert("Enter category name");
+ categoryData.push({name,image});
+ document.getElementById("catOutput").value=
+ JSON.stringify(categoryData,null,2);
+}
+
+function exportCategories(){
+ const json=JSON.stringify(categoryData,null,2);
+ const blob=new Blob([json],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="categories.json";
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ URL.revokeObjectURL(url);
+ alert("categories.json downloaded");
+}
+</script>
+<div class="card">
+  <h3>🖼 Manage Categories</h3>
+  <label>Category Name:</label>
+  <input type="text" id="catName">
+  <label>Image File Name (example: cups.jpg):</label>
+  <input type="text" id="catImage">
+  <button onclick="addCategory()">Add Category</button>
+  <button onclick="exportCategories()">Export categories.json</button>
+  <textarea id="catOutput" style="height:180px"></textarea>
+</div>
+
+<script>
+let categoryData=[];
+
+function addCategory(){
+ const name=document.getElementById("catName").value.trim();
+ const image=document.getElementById("catImage").value.trim();
+ if(!name)return alert("Enter category name");
+ categoryData.push({name,image});
+ document.getElementById("catOutput").value=
+ JSON.stringify(categoryData,null,2);
+}
+
+function exportCategories(){
+ const json=JSON.stringify(categoryData,null,2);
+ const blob=new Blob([json],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="categories.json";
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ URL.revokeObjectURL(url);
+ alert("categories.json downloaded");
+}
+</script>
 </body>
 </html>
