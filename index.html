@@ -9,6 +9,20 @@
 <link rel="preconnect" href="https://wa.me">
 
 <style>
+.hero-banner{
+  width:100%;
+  margin-bottom:20px;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+}
+
+.hero-banner img{
+  width:100%;
+  display:block;
+  object-fit:cover;
+  max-height:550px;
+}
 .categoryGrid{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
@@ -72,7 +86,9 @@ body {
   line-height: 1.35;
 }
 header {
-  background: linear-gradient(90deg, #a6e8a6, #4ea84e);
+  background:#ffffff;
+border-bottom:1px solid #e5e7eb;
+box-shadow:0 2px 10px rgba(0,0,0,.06);
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -367,7 +383,8 @@ box-shadow:0 8px 18px rgba(0,0,0,.15);
 </head>
 <body>
 <header id="topHeader" dir="ltr">
-  <div class="logo">WP</div>
+  <img src="assets/images/logo.png"
+     style="height:60px">
   <div>
     <h1 id="companyName">White Pack</h1>
     <div id="companySlogan" style="font-size:12px;color:#2b5a2b">Best Quality</div>
@@ -383,6 +400,10 @@ box-shadow:0 8px 18px rgba(0,0,0,.15);
 </header>
 
 <main class="container">
+<div class="hero-banner">
+  <img src="assets/images/banner.jpg"
+       alt="WhitePack Banner">
+</div>
   <div id="lastUpdated">Last updated: --</div>
   <div id="adminControls">
     <button class="add-btn" onclick="alert('Use admin.html to upload Excel and export products.json, then upload to GitHub.')">Admin info</button>
